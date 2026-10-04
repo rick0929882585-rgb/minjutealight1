@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>茗記浮光 ‧ 汝窯天青 (宋風典藏版)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN for Sensory Radar Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts - Noto Serif TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      background-color: #F5F2EB;
+      color: #2C3333;
+      font-family: "Noto Serif TC", "PingFang TC", serif;
+    }
+    .ru-card {
+      background-color: #FAF8F5;
+      border: 1px solid #E0DCD3;
+      box-shadow: 0 4px 12px rgba(44, 51, 51, 0.03);
+    }
+    .ru-btn {
+      background-color: #9BB8B1;
+      color: #FFFFFF;
+      transition: all 0.2s ease;
+    }
+    .ru-btn:hover {
+      background-color: #88A7A0;
+    }
+    .ru-btn-gold {
+      background-color: #C5A059;
+      color: #FFFFFF;
+      transition: all 0.2s ease;
+    }
+    .ru-btn-gold:hover {
+      background-color: #B38F48;
+    }
+    .ru-input {
+      background-color: #FFFFFF;
+      border: 1px solid #E0DCD3;
+      color: #2C3333;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .ru-input:focus {
+      border-color: #9BB8B1;
+    }
+    .tab-btn {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+      border-bottom: 2px solid transparent;
+      color: #7A8B88;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      border-color: #9BB8B1;
+      color: #2C3333;
+      font-weight: 600;
+    }
+
+    /* 3D Card Flip Animation */
+    .card-scene {
+      perspective: 1000px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
+    .card-back {
+      background: linear-gradient(135deg, #7A8B88 0%, #5C6E6B 100%);
+      border: 2px solid #C5A059;
+      color: #FAF8F5;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .card-front {
+      transform: rotateY(180deg);
+    }
+
+    /* Strict 5-Tier Color & Glow System */
+    .tier-初級 {
+      border: 1.5px solid #2E7D32;
+      background: linear-gradient(135deg, #F1F8E9 0%, #DCEDC8 100%);
+      color: #1B5E20;
+    }
+    .tier-中級 {
+      border: 1.5px solid #1565C0;
+      background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+      color: #0D47A1;
+    }
+    .tier-史詩 {
+      border: 2px solid #6A1B9A;
+      background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+      color: #4A148C;
+      box-shadow: 0 0 8px rgba(106, 27, 154, 0.25);
+    }
+    .tier-高階 {
+      border: 2px solid #C62828;
+      background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+      color: #B71C1C;
+      box-shadow: 0 0 10px rgba(198, 40, 40, 0.3);
+    }
+    .tier-傳說 {
+      border: 2px solid #D4AF37;
+      background: linear-gradient(135deg, #FFFDF0 0%, #FFF3CD 100%);
+      color: #8D6E63;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+      animation: goldGlow 2.5s infinite alternate;
+    }
+
+    @keyframes goldGlow {
+      0% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
+      100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.8); }
+    }
+
+    @keyframes overtimeFlash {
+      0%, 100% { color: #C62828; opacity: 1; }
+      50% { color: #D32F2F; opacity: 0.4; }
+    }
+    .timer-overtime {
+      animation: overtimeFlash 1s infinite;
+    }
+
+    /* Custom Toast Notifications */
+    #toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+    .toast-item {
+      pointer-events: auto;
+      background-color: #2C3333;
+      color: #FAF8F5;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      border-left: 4px solid #9BB8B1;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      font-size: 0.875rem;
+      animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes toastIn {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8 max-w-5xl mx-auto">
+
+  <header class="mb-4 border-b border-[#E0DCD3] pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <span id="headerEquippedTitle" class="bg-[#5C4033] text-[#FAF8F5] text-[11px] px-2 py-0.5 rounded tracking-wide font-normal">【初入茶道】</span>
+        <h1 class="text-2xl font-bold tracking-widest text-[#2C3333]">茗記浮光</h1>
+      </div>
+      <p class="text-xs text-[#7A8B88] mt-1">逐泡感官評測、雙向沖泡計時與雅集稱號典藏系統</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 md:gap-3">
+      <div class="flex items-center gap-1.5 text-xs bg-[#EAE6DF] px-3 py-2 rounded border border-[#D5CFC5] text-[#5C4033]">
+        <span>🍵 靈芽茶點：</span>
+        <span id="userPointsDisplay" class="font-bold text-[#2C3333] font-mono text-sm">0</span>
+      </div>
+      <button onclick="showDailyTeaModal()" class="border border-[#C5A059] text-[#5C4033] bg-[#FFFDF0] px-3 py-2 rounded text-xs hover:bg-[#FFF3CD] transition-colors flex items-center gap-1 shadow-sm">
+        <span>📅</span> 每日一茶
+      </button>
+      <button id="saveSessionBtn" onclick="saveCurrentSessionToHistory()" class="ru-btn px-3 py-2 rounded text-xs tracking-wider">完成並存檔 (+100點)</button>
+      <button onclick="exportJSON()" class="border border-[#9BB8B1] text-[#5C4033] px-3 py-2 rounded text-xs hover:bg-[#EAE6DF]">匯出 JSON</button>
+      <button onclick="triggerImport()" class="border border-[#9BB8B1] text-[#5C4033] px-3 py-2 rounded text-xs hover:bg-[#EAE6DF]">匯入 JSON</button>
+      <input type="file" id="jsonFileInput" accept=".json" class="hidden" onchange="importJSON(event)">
+      <button onclick="resetCurrentSession()" class="border border-red-300 text-red-700 px-3 py-2 rounded text-xs hover:bg-red-50">開新茶席</button>
+    </div>
+  </header>
+
+  <div class="flex border-b border-[#E0DCD3] mb-6 overflow-x-auto">
+    <button onclick="switchTab('brew')" id="tabBrewBtn" class="tab-btn active whitespace-nowrap">🍵 當前茶席沖泡</button>
+    <button onclick="switchTab('history')" id="tabHistoryBtn" class="tab-btn whitespace-nowrap">📚 歷史茶席與數據對比</button>
+    <button onclick="switchTab('gacha')" id="tabGachaBtn" class="tab-btn whitespace-nowrap">🏆 稱號成就與茶事抽卡</button>
+  </div>
+
+  <!-- ==================== TAB 1: BREWING WORKSPACE ==================== -->
+  <div id="tabBrewView" class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Panel: Setup (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="ru-card p-5 rounded-lg space-y-4">
+          <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033] flex justify-between items-center">
+            <span>茶席與茶款資訊</span>
+            <span class="text-xs text-gray-400 font-normal" id="syncStatus">自動存檔中</span>
+          </h2>
+
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">茶品 / 茶席名稱</label>
+            <input type="text" id="teaName" oninput="updateCurrentSessionData()" placeholder="例如：福壽山高山烏龍" class="ru-input w-full p-2 text-sm rounded">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block text-xs text-gray-500">茶葉大類</label>
+                <span class="text-[10px] text-[#9BB8B1] cursor-pointer hover:underline" onclick="addCustomOption('teaCategory')">+自訂</span>
+              </div>
+              <select id="teaCategory" onchange="handleSelectChange(this, 'teaCategory')" class="ru-input w-full p-2 text-sm rounded"></select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">細分/產地</label>
+              <input type="text" id="teaOrigin" oninput="updateCurrentSessionData()" placeholder="例如：華崗/高冷茶" class="ru-input w-full p-2 text-sm rounded">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block text-xs text-gray-500">發酵程度</label>
+                <span class="text-[10px] text-[#9BB8B1] cursor-pointer hover:underline" onclick="addCustomOption('teaFermentation')">+自訂</span>
+              </div>
+              <select id="teaFermentation" onchange="handleSelectChange(this, 'teaFermentation')" class="ru-input w-full p-2 text-sm rounded"></select>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="block text-xs text-gray-500">焙火程度</label>
+                <span class="text-[10px] text-[#9BB8B1] cursor-pointer hover:underline" onclick="addCustomOption('teaRoast')">+自訂</span>
+              </div>
+              <select id="teaRoast" onchange="handleSelectChange(this, 'teaRoast')" class="ru-input w-full p-2 text-sm rounded"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="ru-card p-5 rounded-lg space-y-4">
+          <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033]">壺具與水質設定</h2>
+
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-xs text-gray-500">使用壺具</label>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-[#9BB8B1] cursor-pointer hover:underline" onclick="openAddTeawareModal()">+ 新增壺具</span>
+                <span class="text-xs text-red-500 hover:text-red-700 cursor-pointer hover:underline" onclick="deleteSelectedTeaware()">🗑️ 刪除此壺</span>
+              </div>
+            </div>
+            <select id="teawareSelect" onchange="handleTeawareChange()" class="ru-input w-full p-2 text-sm rounded"></select>
+            <div class="text-xs text-gray-500 mt-1 flex justify-between">
+              <span>泥料：<span id="displayClay">-</span></span>
+              <span>容量：<span id="displayVolume">-</span> ml</span>
+              <span>養壺里程：<span id="displayBrews" class="text-[#5C4033] font-medium">-</span> 泡</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">投茶量 (g)</label>
+              <input type="number" id="teaWeight" step="0.1" value="8.0" oninput="updateWaterRatio()" class="ru-input w-full p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">水溫 (°C)</label>
+              <input type="number" id="waterTemp" value="95" oninput="updateCurrentSessionData()" class="ru-input w-full p-2 text-sm rounded">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">茶水比</label>
+              <div id="displayRatio" class="p-2 text-xs font-mono bg-gray-50 border rounded text-center border-[#E0DCD3] mt-0.5">1 : 17.5</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-xs text-gray-500">水源類型</label>
+              <span class="text-[10px] text-[#9BB8B1] cursor-pointer hover:underline" onclick="addCustomOption('waterType')">+自訂</span>
+            </div>
+            <select id="waterType" onchange="handleSelectChange(this, 'waterType')" class="ru-input w-full p-2 text-sm rounded"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Dual-Direction Timer & Sensory Radar (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="ru-card p-5 rounded-lg text-center relative">
+          <div class="flex justify-between items-center text-xs text-gray-500 mb-2 border-b border-[#E0DCD3] pb-2">
+            <span class="flex items-center gap-1.5">
+              <span>正負雙向沖泡計時器</span>
+              <button onclick="toggleSoundMute()" id="soundToggleBtn" class="text-xs px-2 py-0.5 rounded border border-[#D5CFC5] bg-[#EAE6DF] hover:bg-[#E0DCD3]">🔊 音效開啟</button>
+            </span>
+            <span>當前：第 <span id="currentBrewRound" class="text-base font-bold text-[#2C3333]">1</span> 泡</span>
+          </div>
+
+          <div class="my-3">
+            <div class="text-6xl font-mono font-light text-[#2C3333] transition-colors" id="timerDisplay">-00:25</div>
+            <div id="timerStatusNotice" class="text-xs text-gray-500 mt-1 h-4 font-mono">準備注水</div>
+          </div>
+
+          <div class="flex justify-center items-center gap-2 mb-3 text-xs text-gray-600">
+            <span>預設倒數秒數：</span>
+            <input type="number" id="timerInput" value="25" min="1" max="600" onchange="setTimerDuration(this.value)" class="ru-input w-20 p-1 text-center text-sm rounded font-mono">
+            <span>秒</span>
+          </div>
+
+          <div class="flex justify-center gap-3 mb-4">
+            <button onclick="toggleTimer()" id="timerBtn" class="ru-btn px-8 py-2.5 rounded text-sm font-medium tracking-wider">開始注水</button>
+            <button onclick="finishRoundAndNext()" class="border border-[#9BB8B1] text-[#5C4033] px-5 py-2.5 rounded text-sm hover:bg-[#EAE6DF]">出湯 / 下一泡 (+50點/每日1次)</button>
+            <button onclick="resetTimer()" class="border border-gray-300 text-gray-500 px-3 py-2.5 rounded text-sm hover:bg-gray-100">重設</button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-2 text-left">
+            <div class="md:col-span-5">
+              <div class="flex justify-between items-center mb-1">
+                <label class="block text-[11px] text-gray-500">本泡注水手法</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-[#9BB8B1] cursor-pointer hover:underline" onclick="addCustomOption('pourMethod')">+自訂</span>
+                  <span class="text-[10px] text-red-500 hover:text-red-700 cursor-pointer hover:underline" onclick="deleteCurrentPourMethod()">🗑️ 刪除手法</span>
+                </div>
+              </div>
+              <select id="pourMethodSelect" onchange="handleSelectChange(this, 'pourMethod')" class="ru-input w-full p-2 text-xs rounded"></select>
+            </div>
+            <div class="md:col-span-7">
+              <label class="block text-[11px] text-gray-500 mb-1">口感體會與筆記 (可點擊下方標籤快速帶入)</label>
+              <input type="text" id="roundNote" placeholder="例如：花果香高揚、湯質清甜..." class="ru-input w-full p-2 text-xs rounded">
+            </div>
+          </div>
+        </div>
+
+        <!-- 6-Dimension Radar with 0.1 Resolution Sliders -->
+        <div class="ru-card p-5 rounded-lg">
+          <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 mb-4 text-[#5C4033]">六維度感官與細緻評分 (0.1 微調)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <div class="w-full h-60">
+              <canvas id="sensoryRadar"></canvas>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div>
+                <div class="flex justify-between"><span>外觀/干香</span><span id="val_dry" class="font-mono font-bold text-[#5C4033]">8.5</span></div>
+                <input type="range" id="score_dry" min="1" max="10" step="0.1" value="8.5" oninput="updateRadarChart()" class="w-full accent-[#9BB8B1]">
+              </div>
+              <div>
+                <div class="flex justify-between"><span>香氣表現</span><span id="val_aroma" class="font-mono font-bold text-[#5C4033]">9.0</span></div>
+                <input type="range" id="score_aroma" min="1" max="10" step="0.1" value="9.0" oninput="updateRadarChart()" class="w-full accent-[#9BB8B1]">
+              </div>
+              <div>
+                <div class="flex justify-between"><span>滋味醇厚</span><span id="val_flavor" class="font-mono font-bold text-[#5C4033]">8.5</span></div>
+                <input type="range" id="score_flavor" min="1" max="10" step="0.1" value="8.5" oninput="updateRadarChart()" class="w-full accent-[#9BB8B1]">
+              </div>
+              <div>
+                <div class="flex justify-between"><span>湯質口感</span><span id="val_mouthfeel" class="font-mono font-bold text-[#5C4033]">8.0</span></div>
+                <input type="range" id="score_mouthfeel" min="1" max="10" step="0.1" value="8.0" oninput="updateRadarChart()" class="w-full accent-[#9BB8B1]">
+              </div>
+              <div>
+                <div class="flex justify-between"><span>生津喉韻</span><span id="val_throat" class="font-mono font-bold text-[#5C4033]">9.0</span></div>
+                <input type="range" id="score_throat" min="1" max="10" step="0.1" value="9.0" oninput="updateRadarChart()" class="w-full accent-[#9BB8B1]">
+              </div>
+              <div>
+                <div class="flex justify-between"><span>體感茶氣</span><span id="val_qi" class="font-mono font-bold text-[#5C4033]">8.5</span></div>
+                <input type="range" id="score_qi" min="1" max="10" step="0.1" value="8.5" oninput="updateRadarChart()" class="w-full accent-[#9BB8B1]">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags System -->
+          <div class="mt-5 border-t border-[#E0DCD3] pt-4">
+            <div class="flex justify-between items-center mb-2">
+              <label class="block text-xs font-medium text-[#5C4033]">感官特徵與風味標籤 (點擊標籤文字可快速填入筆記)</label>
+            </div>
+            <div id="tagsContainer" class="flex flex-wrap gap-1.5 mb-2"></div>
+            <div class="flex gap-2">
+              <input type="text" id="newTagInput" placeholder="輸入自訂標籤 (如：高山氣、花香) 後按 Enter" onkeypress="if(event.key==='Enter') addCustomTag()" class="ru-input flex-1 p-2 text-xs rounded">
+              <button onclick="addCustomTag()" class="ru-btn px-4 py-1.5 text-xs rounded">新增標籤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brew Rounds Table -->
+    <div class="ru-card p-5 rounded-lg space-y-4">
+      <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033] flex justify-between items-center">
+        <span>本場茶席逐泡紀錄彙整</span>
+        <span class="text-xs text-gray-500 font-normal">標籤內容將同步附隨於筆記存檔</span>
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left border-collapse">
+          <thead>
+            <tr class="bg-[#EAE6DF] text-[#5C4033]">
+              <th class="p-2 border border-[#D5CFC5]">泡數</th>
+              <th class="p-2 border border-[#D5CFC5]">預設/實際秒數</th>
+              <th class="p-2 border border-[#D5CFC5]">注水手法</th>
+              <th class="p-2 border border-[#D5CFC5]">口感體會與風味筆記</th>
+            </tr>
+          </thead>
+          <tbody id="brewRoundsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: HISTORY & COMPARISON ==================== -->
+  <div id="tabHistoryView" class="space-y-6 hidden">
+    <div class="ru-card p-5 rounded-lg space-y-4">
+      <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033] flex justify-between items-center">
+        <span>跨茶席雙雷達圖數據對比</span>
+        <span class="text-xs text-gray-500 font-normal">疊加比較不同茶款、水溫或壺具之表現</span>
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-3 rounded border border-[#E0DCD3]">
+        <div>
+          <label class="block text-xs font-semibold text-[#9BB8B1] mb-1">基準茶席 (Dataset A - 天青)</label>
+          <select id="compareSelectA" onchange="updateComparison()" class="ru-input w-full p-2 text-xs rounded"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#C86D51] mb-1">對照茶席 (Dataset B - 赭紅)</label>
+          <select id="compareSelectB" onchange="updateComparison()" class="ru-input w-full p-2 text-xs rounded"></select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div class="md:col-span-6 h-72">
+          <canvas id="compareRadar"></canvas>
+        </div>
+        <div class="md:col-span-6 space-y-3">
+          <h3 class="text-xs font-bold text-[#5C4033]">參數與分數對照表</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-[#EAE6DF] text-[#5C4033]">
+                  <th class="p-1.5 border border-[#D5CFC5]">指標</th>
+                  <th class="p-1.5 border border-[#D5CFC5] text-[#9BB8B1]">茶席 A</th>
+                  <th class="p-1.5 border border-[#D5CFC5] text-[#C86D51]">茶席 B</th>
+                </tr>
+              </thead>
+              <tbody id="compareTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Search & Filter -->
+    <div class="ru-card p-5 rounded-lg space-y-4">
+      <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033]">歷史茶席資料庫</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">搜尋關鍵字</label>
+          <input type="text" id="historySearchInput" oninput="renderHistoryList()" placeholder="搜尋茶名、產地或風味標籤..." class="ru-input w-full p-2 text-xs rounded">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">茶類過濾</label>
+          <select id="historyCategoryFilter" onchange="renderHistoryList()" class="ru-input w-full p-2 text-xs rounded">
+            <option value="ALL">全部茶類</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">統計資訊</label>
+          <div class="p-2 bg-gray-50 border border-[#E0DCD3] rounded text-xs text-gray-600">
+            已存檔茶席：<span id="historyCount" class="font-bold text-[#2C3333]">0</span> 場
+          </div>
+        </div>
+      </div>
+
+      <div id="historyListContainer" class="space-y-3 pt-2"></div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: GACHA & ACHIEVEMENTS ==================== -->
+  <div id="tabGachaView" class="space-y-6 hidden">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+      <!-- Left: Gacha Draw Control -->
+      <div class="md:col-span-7 ru-card p-5 rounded-lg space-y-4">
+        <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033] flex justify-between items-center">
+          <span>🍵 雅集茶事靈芽抽卡</span>
+          <span class="text-xs text-gray-500 font-normal">古樂編磬音效與五階分級稱號卡牌</span>
+        </h2>
+
+        <div class="bg-[#F2EDE4] p-4 rounded-lg border border-[#E0DCD3] text-center space-y-3">
+          <p class="text-xs text-[#5C4033] leading-relaxed">
+            每日首次出湯下一泡獲取 <span class="font-bold text-[#9BB8B1]">50 點</span>，每日首次完整存檔獲取 <span class="font-bold text-[#9BB8B1]">100 點</span>！<br>
+            消耗點數抽取特殊雅集稱號，分級包含：<br>
+            <span class="text-green-700 font-semibold">初級(綠)</span> ‧ 
+            <span class="text-blue-700 font-semibold">中級(藍)</span> ‧ 
+            <span class="text-purple-700 font-semibold">史詩(紫)</span> ‧ 
+            <span class="text-red-700 font-semibold">高階(紅)</span> ‧ 
+            <span class="text-yellow-700 font-semibold">傳說(金)</span>
+          </p>
+          <div class="flex justify-center gap-4 pt-2">
+            <button onclick="drawGacha(1)" class="ru-btn px-6 py-2.5 rounded text-xs tracking-wider">單抽 (100 點)</button>
+            <button onclick="drawGacha(10)" class="ru-btn-gold px-6 py-2.5 rounded text-xs tracking-wider">十連抽 (1000 點)</button>
+          </div>
+        </div>
+
+        <!-- Animated Draw Showcase -->
+        <div id="gachaResultContainer" class="hidden border border-[#D5CFC5] p-4 rounded-lg bg-[#FAF8F5]">
+          <h3 class="text-xs font-bold text-[#5C4033] mb-3 text-center">🎉 抽卡獲得成果 (點擊卡牌可翻面)</h3>
+          <div id="gachaCardsGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
+        </div>
+      </div>
+
+      <!-- Right: Title Equipment -->
+      <div class="md:col-span-5 ru-card p-5 rounded-lg space-y-4">
+        <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033]">佩戴茶道稱號</h2>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">當前配戴稱號</label>
+          <select id="titleSelect" onchange="equipTitle(this.value)" class="ru-input w-full p-2 text-xs rounded"></select>
+        </div>
+        <div class="p-3 bg-gray-50 rounded border border-[#E0DCD3] text-xs text-gray-600">
+          稱號將同步顯示於系統標頭，並記錄於匯出的茶席資料中。
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements Section -->
+    <div class="ru-card p-5 rounded-lg space-y-4">
+      <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033]">茶道成就與里程碑</h2>
+      <div id="achievementsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+    </div>
+
+    <!-- Collection Gallery -->
+    <div class="ru-card p-5 rounded-lg space-y-4">
+      <h2 class="text-base font-semibold border-b border-[#E0DCD3] pb-2 text-[#5C4033] flex justify-between items-center">
+        <span>雅集稱號典藏閣</span>
+        <span class="text-xs text-gray-500 font-normal">已解鎖抽卡稱號：<span id="collectionCount">0</span> / <span id="totalCardsCount">0</span></span>
+      </h2>
+      <div id="collectionGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3"></div>
+    </div>
+  </div>
+
+  <!-- Add Teaware Modal -->
+  <div id="teawareModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-[#FAF8F5] border border-[#E0DCD3] rounded-lg p-6 max-w-md w-full shadow-xl space-y-4">
+      <h3 class="text-base font-bold text-[#5C4033]">新增壺具資料</h3>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">壺具名稱</label>
+        <input type="text" id="newPotName" placeholder="例如：朱泥標準水平壺" class="ru-input w-full p-2 text-xs rounded">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">泥料/材質</label>
+          <input type="text" id="newPotClay" placeholder="例如：朱泥" class="ru-input w-full p-2 text-xs rounded">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">容量 (ml)</label>
+          <input type="number" id="newPotVolume" placeholder="140" class="ru-input w-full p-2 text-xs rounded">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">初始養壺泡數</label>
+        <input type="number" id="newPotBrews" value="0" class="ru-input w-full p-2 text-xs rounded">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeAddTeawareModal()" class="border px-4 py-1.5 text-xs rounded text-gray-600">取消</button>
+        <button onclick="saveNewTeaware()" class="ru-btn px-4 py-1.5 text-xs rounded">儲存壺具</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Confirmation Modal -->
+  <div id="customConfirmModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-[#FAF8F5] border border-[#E0DCD3] rounded-lg p-5 max-w-sm w-full shadow-xl space-y-4 text-center">
+      <h3 id="confirmModalTitle" class="text-sm font-bold text-[#5C4033]">確認操作</h3>
+      <p id="confirmModalMessage" class="text-xs text-gray-600 leading-relaxed"></p>
+      <div class="flex justify-center gap-3 pt-2">
+        <button id="confirmModalCancelBtn" onclick="closeConfirmModal()" class="border border-gray-300 px-4 py-1.5 text-xs rounded text-gray-600 hover:bg-gray-100">取消</button>
+        <button id="confirmModalOkBtn" class="ru-btn px-4 py-1.5 text-xs rounded">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Prompt Modal -->
+  <div id="customPromptModal" class="fixed inset-0 bg-black bg-opacity-30 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-[#FAF8F5] border border-[#E0DCD3] rounded-lg p-5 max-w-sm w-full shadow-xl space-y-4">
+      <h3 id="promptModalTitle" class="text-sm font-bold text-[#5C4033]">新增自訂選項</h3>
+      <input type="text" id="promptModalInput" class="ru-input w-full p-2 text-xs rounded" placeholder="請輸入名稱...">
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closePromptModal()" class="border border-gray-300 px-3 py-1.5 text-xs rounded text-gray-600">取消</button>
+        <button id="promptModalOkBtn" class="ru-btn px-4 py-1.5 text-xs rounded">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Tea Modal -->
+  <div id="dailyTeaModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-[#FAF8F5] border-2 border-[#C5A059] rounded-xl max-w-lg w-full shadow-2xl overflow-hidden relative transition-all">
+      <div class="bg-gradient-to-r from-[#5C4033] via-[#7A8B88] to-[#5C4033] text-[#FAF8F5] p-5 text-center relative border-b border-[#C5A059]">
+        <span class="absolute top-3 left-4 text-[10px] tracking-widest text-[#FFFDF0] border border-[#C5A059] px-2 py-0.5 rounded">宋風 ‧ 雅集茶曆</span>
+        <span class="absolute top-3 right-4 cursor-pointer text-gray-300 hover:text-white text-base" onclick="closeDailyTeaModal()">✕</span>
+        <div id="dailyCardSolarBadge" class="inline-block mt-2 px-3 py-1 bg-[#C5A059] text-white text-xs rounded-full font-medium tracking-wider shadow">
+          -- 節氣 --
+        </div>
+        <h2 id="dailyCardTeaName" class="text-2xl font-bold tracking-widest mt-2 font-serif text-[#FFFDF0]">-- 每日推薦茶款 --</h2>
+        <p id="dailyCardSubTitle" class="text-xs text-[#EAE6DF] mt-1 italic">-- 茶道小註 --</p>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs text-[#2C3333]">
+        <div class="flex items-center justify-between border-b border-[#E0DCD3] pb-2 text-[#5C4033]">
+          <span id="dailyCardDateStr" class="font-bold text-sm">📅 2026年 -- 月 -- 日</span>
+          <span id="dailyCardFestiveTag" class="text-[11px] bg-[#EAE6DF] px-2 py-0.5 rounded text-[#7A8B88]">時令吉日</span>
+        </div>
+
+        <div class="p-3.5 bg-[#F5F2EB] border-l-4 border-[#C5A059] rounded text-gray-700 space-y-1">
+          <div class="font-semibold text-[#5C4033] text-[11px]">【茶言茶語 ‧ 歲月雋永】</div>
+          <p id="dailyCardQuote" class="italic text-[#2C3333] leading-relaxed">「茶味即世味，煎茶如鍛心。」</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 bg-white border border-[#E0DCD3] rounded-lg">
+            <div class="font-semibold text-[#9BB8B1] mb-1">🌿 茶款風味特色</div>
+            <p id="dailyCardFlavor" class="text-gray-600 leading-normal">--</p>
+          </div>
+          <div class="p-3 bg-white border border-[#E0DCD3] rounded-lg">
+            <div class="font-semibold text-[#C86D51] mb-1">💡 最佳沖泡建議</div>
+            <p id="dailyCardBrewAdvice" class="text-gray-600 leading-normal">--</p>
+          </div>
+        </div>
+
+        <div class="p-3 bg-[#E3F2FD]/40 border border-[#BBDEFB] rounded-lg">
+          <div class="font-semibold text-[#0D47A1] mb-1 flex items-center gap-1">
+            <span>🍵 時令養生品茶小知識</span>
+          </div>
+          <p id="dailyCardHealthTip" class="text-gray-700 leading-relaxed">--</p>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <button onclick="closeDailyTeaModal()" class="ru-btn-gold px-6 py-2 rounded text-xs font-medium tracking-wider shadow">
+            收下茶曆 ‧ 靜心入座
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Completion Modal -->
+  <div id="completionQuoteModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-[#FAF8F5] border border-[#9BB8B1] rounded-xl max-w-md w-full shadow-2xl p-6 space-y-4 relative text-center">
+      <div class="w-12 h-12 bg-[#9BB8B1]/20 rounded-full flex items-center justify-center mx-auto text-2xl">
+        🍵
+      </div>
+      <div>
+        <span class="text-xs text-[#9BB8B1] font-semibold tracking-widest uppercase">Tea Evaluation Saved</span>
+        <h3 class="text-lg font-bold text-[#5C4033] mt-0.5">茶席圓滿 ‧ 佳韻留存</h3>
+      </div>
+
+      <div class="p-4 bg-[#F5F2EB] border border-[#E0DCD3] rounded-lg space-y-2 text-left">
+        <div class="text-[11px] font-bold text-[#C5A059] flex items-center gap-1">
+          <span>📜 茶言茶語</span>
+        </div>
+        <p id="completionQuoteText" class="text-xs text-[#2C3333] font-serif italic leading-relaxed">
+          -- 名言 --
+        </p>
+        <p id="completionQuoteAuthor" class="text-[10px] text-gray-500 text-right">
+          -- 出處 --
+        </p>
+      </div>
+
+      <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-left text-xs space-y-1">
+        <div class="font-bold text-emerald-800 flex items-center gap-1">
+          <span>🌱 時令養生小知識</span>
+        </div>
+        <p id="completionHealthTip" class="text-emerald-900 leading-normal">
+          -- 養生小知識 --
+        </p>
+      </div>
+
+      <div id="completionRewardNotice" class="text-xs text-[#5C4033] font-medium bg-[#FFFDF0] p-2 rounded border border-[#C5A059]/40">
+        🎉 獲得靈芽茶點獎勵！
+      </div>
+
+      <button onclick="closeCompletionModal()" class="ru-btn w-full py-2 rounded text-xs tracking-wider font-medium shadow">
+        圓滿收盞
+      </button>
+    </div>
+  </div>
+
+  <!-- Dynamic Toast Container -->
+  <div id="toast-container"></div>
+
+  <script>
+    const MINGJI_SYSTEM_NAME = "茗記浮光";
+    const MINGJI_SCHEMA_VERSION = "1.0";
+
+    const STORAGE_KEYS = {
+      POINTS: 'mingji_v1_points',
+      UNLOCKED_CARDS: 'mingji_v1_unlocked_cards',
+      EQUIPPED_TITLE: 'mingji_v1_equipped_title',
+      TEA_HISTORY: 'mingji_v1_tea_history',
+      TEAWARE_LIST: 'mingji_v1_teaware_list',
+      CURRENT_SESSION: 'mingji_v1_current_session',
+      CUSTOM_OPTIONS: 'mingji_v1_custom_options',
+      LAST_DAILY_SAVE_DATE: 'mingji_v1_last_daily_save_date',
+      LAST_BREW_POINT_DATE: 'mingji_v1_last_brew_point_date',
+      LAST_DAILY_CARD_SEEN: 'mingji_v1_last_daily_card_seen'
+    };
+
+    function getTodayDateString() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    let confirmCallback = null;
+
+    function showConfirm(message, callback) {
+      confirmCallback = callback;
+      document.getElementById('confirmModalMessage').textContent = message;
+      const okBtn = document.getElementById('confirmModalOkBtn');
+      okBtn.onclick = () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      };
+      document.getElementById('customConfirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      confirmCallback = null;
+      document.getElementById('customConfirmModal').classList.add('hidden');
+    }
+
+    let promptCallback = null;
+
+    function showPrompt(title, defaultValue, callback) {
+      promptCallback = callback;
+      document.getElementById('promptModalTitle').textContent = title;
+      const input = document.getElementById('promptModalInput');
+      input.value = defaultValue || '';
+      
+      const okBtn = document.getElementById('promptModalOkBtn');
+      okBtn.onclick = () => {
+        const val = input.value.trim();
+        if (val && promptCallback) promptCallback(val);
+        closePromptModal();
+      };
+
+      document.getElementById('customPromptModal').classList.remove('hidden');
+      input.focus();
+    }
+
+    function closePromptModal() {
+      promptCallback = null;
+      document.getElementById('customPromptModal').classList.add('hidden');
+    }
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const item = document.createElement('div');
+      item.className = 'toast-item';
+      item.textContent = message;
+      container.appendChild(item);
+      setTimeout(() => {
+        item.style.opacity = '0';
+        item.style.transition = 'opacity 0.3s';
+        setTimeout(() => item.remove(), 300);
+      }, 3000);
+    }
+
+    const DEFAULT_CUSTOM_OPTIONS = {
+      teaCategory: ["烏龍茶", "綠茶", "紅茶", "白茶", "黑茶/普洱", "黃茶"],
+      teaFermentation: ["不發酵 (0%)", "輕發酵 (15-25%)", "中發酵 (30-50%)", "重發酵 (60-80%)", "全發酵 (100%)", "後發酵"],
+      teaRoast: ["生茶/無焙火", "輕焙火/三分火", "中焙火/五分火", "重焙火/足火", "炭焙老茶"],
+      waterType: ["純淨水/RO水", "山泉水", "竹炭過濾水", "礦泉水", "自來水"],
+      pourMethod: ["高沖環繞", "定點細流", "低斟慢注", "壓壺催香", "大水流衝擊"]
+    };
+
+    const DEFAULT_TEAWARE = [
+      { id: 'tw_1', name: '汝窯天青西施壺', clay: '汝窯天青釉', volume: 140, brews: 12 },
+      { id: 'tw_2', name: '宜興紫砂標準壺', clay: '原礦紫泥', volume: 160, brews: 35 },
+      { id: 'tw_3', name: '蓋碗 (白瓷)', clay: '德化羊脂玉瓷', volume: 120, brews: 50 }
+    ];
+
+    const DEFAULT_TAGS = ["花香", "果香", "高山氣", "蜜香", "岩韻", "木質香", "奶油香", "生津", "回甘", "觀音韻", "蘭花香", "喉韻悠長"];
+
+    const GACHA_CARDS_POOL = [
+      { id: 'c1', title: '【初入茶道】', tier: '初級', desc: '開始探索宋風茶藝與感官評測之道。' },
+      { id: 'c2', title: '【煮水採薇】', tier: '初級', desc: '山泉初沸，清氣滿室。' },
+      { id: 'c3', title: '【清泉明月】', tier: '初級', desc: '汲得煎茶泉一斛，汲清月影水中含。' },
+      { id: 'c4', title: '【汲水試茶】', tier: '初級', desc: '微火初烹，甘露入盞。' },
+      { id: 'c5', title: '【松風竹韻】', tier: '中級', desc: '茶煙輕揚，聽松風於竹林深處。' },
+      { id: 'c6', title: '【陸羽遺風】', tier: '中級', desc: '承襲茶經精髓，細辨茶水滋味。' },
+      { id: 'c7', title: '【寒夜客來】', tier: '中級', desc: '寒夜客來茶當酒，竹爐湯沸火初紅。' },
+      { id: 'c8', title: '【一碗清歡】', tier: '中級', desc: '人間有味是清歡，一盞微香勝萬金。' },
+      { id: 'c9', title: '【東坡雪水】', tier: '史詩', desc: '獨攜天上小團月，來試人間第二泉。' },
+      { id: 'c10', title: '【點茶三昧】', tier: '史詩', desc: '擊拂生華，湯花雪白，妙悟點茶三昧。' },
+      { id: 'c11', title: '【兔毫金絲】', tier: '史詩', desc: '建盞流光，兔毫細紋襯天青。' },
+      { id: 'c12', title: '【七碗受至味】', tier: '史詩', desc: '七碗吃不得，唯覺兩腋習習清風生。' },
+      { id: 'c13', title: '【宋韻天青】', tier: '高階', desc: '雨過天青雲破處，千峰翠色入茶盞。' },
+      { id: 'c14', title: '【御前茶仙】', tier: '高階', desc: '品評無雙，宋徽宗茶論旨趣獨具。' },
+      { id: 'c15', title: '【龍團鳳餅】', tier: '高階', desc: '宮廷貢茶之尊，珍重珍重。' },
+      { id: 'c16', title: '【紫筍聖品】', tier: '高階', desc: '陽崖陰林，紫者為上，筍者為上。' },
+      { id: 'c17', title: '【汝窯遺韻 ‧ 萬物皆呈天青】', tier: '傳說', desc: '登峰造極之境界，溫潤如玉，如天青一羽劃過長空。' },
+      { id: 'c18', title: '【無上茶皇 ‧ 虛空泡影】', tier: '傳說', desc: '茶道終極大成，一泡一世界，萬般皆自在。' }
+    ];
+
+    const ACHIEVEMENTS = [
+      { id: 'ach_1', title: '茶道初試', desc: '完成第 1 場茶席存檔', reqType: 'sessions', reqVal: 1 },
+      { id: 'ach_2', title: '三泡有味', desc: '累計沖泡達到 10 泡', reqType: 'brews', reqVal: 10 },
+      { id: 'ach_3', title: '靈芽積累', desc: '靈芽茶點達到 500 點', reqType: 'points', reqVal: 500 },
+      { id: 'ach_4', title: '典藏集錦', desc: '解鎖 5 個雅集稱號', reqType: 'cards', reqVal: 5 },
+      { id: 'ach_5', title: '茶道大師', desc: '完成 10 場茶席存檔', reqType: 'sessions', reqVal: 10 }
+    ];
+
+    // Expanded 36 Daily Tea Database
+    const SOLAR_TERMS_TEA_DB = [
+      {
+        solarTerm: "立春 ‧ 萌芽",
+        teaName: "三峽碧螺春",
+        subTitle: "台灣綠茶名品，細嫩鮮爽",
+        flavor: "豆香濃郁、青草鮮爽、湯色黃綠明亮",
+        brewAdvice: "水溫 80~85°C 慢沖，不宜蓋悶，展現鮮嫩茶香",
+        quote: "「嘗茶試水惜新春，竹下松間自理薪。」—— 陸游",
+        healthTip: "春季人體肝氣升發，飲用鮮嫩綠茶能清熱祛肝火、提神醒腦。"
+      },
+      {
+        solarTerm: "雨水 ‧ 潤物",
+        teaName: "西湖龍井",
+        subTitle: "扁平挺直，色翠香郁",
+        flavor: "炒花生香、豆香持久、甘醇爽口",
+        brewAdvice: "水溫 85°C 玻璃杯投茶，靜觀芽葉舒展",
+        quote: "「欲把西湖比西子，從來佳茗似佳人。」—— 蘇軾",
+        healthTip: "春雷初響體內濕氣萌發，龍井富含茶多酚與維生素，利尿去濕。"
+      },
+      {
+        solarTerm: "驚蟄 ‧ 綠雪",
+        teaName: "洞庭碧螺春",
+        subTitle: "條索纖細，捲曲成螺，白毫顯露",
+        flavor: "花果複合香、鮮醇甘厚、回甘迅速",
+        brewAdvice: "水溫 80°C 上投法，先注水後投茶",
+        quote: "「採得春茶滿籠香，洞庭水暖試新芳。」—— 古詩",
+        healthTip: "驚蟄時節氣溫回升，嫩芽養分豐沛，具有良好抗氧化與護眼功效。"
+      },
+      {
+        solarTerm: "春分 ‧ 紅韻",
+        teaName: "日月潭紅玉 (台茶18號)",
+        subTitle: "肉桂與薄荷兼具之東方紅韻",
+        flavor: "天然肉桂香、薄荷涼感、蜜糖甘甜",
+        brewAdvice: "水溫 90~95°C，沖泡時間宜短，展現靈動香氣",
+        quote: "「紅玉溫潤透薄荷，一盞甘霖醒心脾。」—— 茶道隨筆",
+        healthTip: "春分氣溫忽冷忽熱，全發酵紅茶性溫，能溫中健胃、舒緩情緒。"
+      },
+      {
+        solarTerm: "清明 ‧ 雲霧",
+        teaName: "阿里山高山烏龍",
+        subTitle: "雲霧繚繞，高山氣韻極佳",
+        flavor: "清雅蘭花香、高山氣十足、甜水生津",
+        brewAdvice: "水溫 95°C 高沖，第一泡快速出湯展現山氣",
+        quote: "「清明太守高壓卷，穀雨茶仙遠過家。」—— 蘇軾",
+        healthTip: "高山日夜溫差大，積聚豐富胺基酸，有助於舒緩壓力、提振精神。"
+      },
+      {
+        solarTerm: "穀雨 ‧ 採香",
+        teaName: "安吉白茶 (白葉茶)",
+        subTitle: "高胺基酸，鮮爽如甘露",
+        flavor: "極致鮮爽、毫香顯赫、高甜無苦澀",
+        brewAdvice: "水溫 80~85°C 溫和注水，品味細緻湯質",
+        quote: "「鳳形安吉白茶鮮，玉髓瓊漿落人間。」—— 頌茶詩",
+        healthTip: "高含量 L-茶胺酸有助促進 alpha 腦波，達到放鬆身心與提升專注力效果。"
+      },
+      {
+        solarTerm: "立夏 ‧ 翠竹",
+        teaName: "文山包種茶",
+        subTitle: "香氣清揚，似花香優雅",
+        flavor: "幽雅花香、桂花香、湯質清澈滑順",
+        brewAdvice: "水溫 90°C 中流溫注，充分釋放條形茶香",
+        quote: "「包種清香冠淡水，一盞清芬消半暑。」—— 鄉土茶誌",
+        healthTip: "包種茶發酵度較低，能生津止渴、促進腸胃蠕動。"
+      },
+      {
+        solarTerm: "小滿 ‧ 蘭香",
+        teaName: "坪林包種老茶",
+        subTitle: "歲月沉澱，幽蘭帶藥香",
+        flavor: "沉穩樟香、梅酸回甘、蘭花底韻",
+        brewAdvice: "水溫 95~100°C 沸水慢泡，宜用紫砂壺",
+        quote: "「老茶沉香如歲月，一盞溫潤入心田。」—— 坪林茶記",
+        healthTip: "陳年老茶茶性極溫，能順氣安神、暖胃消食。"
+      },
+      {
+        solarTerm: "芒種 ‧ 蜜韻",
+        teaName: "東方美人 (白毫烏龍)",
+        subTitle: "小綠葉蟬叮咬，天然蜜果香",
+        flavor: "熟果香、濃郁天然蜂蜜香、滋味圓柔",
+        brewAdvice: "水溫 85~90°C，陶瓷蓋碗慢注，避免高溫燙傷蜜香",
+        quote: "「琥珀湯濃蜜韻長，採茶姑娘唱山歌。」—— 客家諺語",
+        healthTip: "發酵程度高，茶性溫和不刺激，含有豐富多酚類物質，具養顏功效。"
+      },
+      {
+        solarTerm: "夏至 ‧ 觀音韻",
+        teaName: "木柵正欉鐵觀音",
+        subTitle: "重焙火傳統韻味，弱果酸甜",
+        flavor: "火香濃郁、果酸幽微、觀音韻深厚",
+        brewAdvice: "水溫 98~100°C 沸水，紫砂壺宜保溫高沖",
+        quote: "「極品觀音重火焙，七泡有餘香依然。」—— 品茶隨筆",
+        healthTip: "經過長時間反覆烘焙，茶性溫暖去油膩，極適合飯後消食暖胃。"
+      },
+      {
+        solarTerm: "小暑 ‧ 素雅",
+        teaName: "福鼎白毫銀針",
+        subTitle: "滿披白毫，如針如雪",
+        flavor: "毫香清鮮、野香顯赫、湯色淺黃清亮",
+        brewAdvice: "水溫 85~90°C 靜置慢浸，適合多泡品飲",
+        quote: "「一年茶、三年藥、七年寶。」—— 福鼎茶諺",
+        healthTip: "白茶黃酮類物質豐富，退熱解暑、降火清心，是酷暑季節清熱良藥。"
+      },
+      {
+        solarTerm: "大暑 ‧ 雲海",
+        teaName: "黃山毛峰",
+        subTitle: "雀舌微黃，清香高長",
+        flavor: "清香帶蘭花香、醇醇甘甜、回味無窮",
+        brewAdvice: "水溫 85°C 沖泡，欣賞雲霧繚繞之茶姿",
+        quote: "「黃山松柏蒸雲霧，採得雀舌烹金湯。」—— 徽州茶吟",
+        healthTip: "清熱解暑，能補充高溫發汗流失之微量元素與水分。"
+      },
+      {
+        solarTerm: "立秋 ‧ 清爽",
+        teaName: "信陽毛尖",
+        subTitle: "細圓緊直，白毫顯露",
+        flavor: "栗香濃郁、滋味鮮濃、回甘強烈",
+        brewAdvice: "水溫 85°C 沖泡，注意控溫保持鮮爽",
+        quote: "「淮南茶信陽第一，色翠香濃韻無窮。」—— 茶史文選",
+        healthTip: "立秋初至秋燥萌生，毛尖生津潤燥、清心明目。"
+      },
+      {
+        solarTerm: "處暑 ‧ 頂峰",
+        teaName: "福壽山高冷茶",
+        subTitle: "海拔二千四百公尺之極品冷韻",
+        flavor: "冷礦味強勁、水質軟甜、極致回甘",
+        brewAdvice: "水溫 95°C 沸水快出湯，感受高山冷霜氣",
+        quote: "「福壽山頭霜雪冷，一盞高冷鎮乾坤。」—— 高山茶記",
+        healthTip: "高海拔高冷茶含豐富茶多糖與天然胺基酸，生津止渴力特強。"
+      },
+      {
+        solarTerm: "白露 ‧ 岩骨",
+        teaName: "武夷肉桂 (岩茶)",
+        subTitle: "岩骨花香，桂皮香強烈",
+        flavor: "桂皮辛香、奶油香、醇厚有骨力",
+        brewAdvice: "沸水 100°C 高沖，紫砂壺悶泡出岩韻",
+        quote: "「無由持一碗，寄與愛茶人。」—— 白居易",
+        healthTip: "溫通經脈、驅散寒濕，適合白露季節氣溫轉涼時品飲。"
+      },
+      {
+        solarTerm: "秋分 ‧ 蘭韻",
+        teaName: "武夷水仙 (老叢水仙)",
+        subTitle: "木質叢味，幽蘭芬芳",
+        flavor: "粽葉香、木質香、蘭花底韻悠長",
+        brewAdvice: "沸水 100°C 浸泡，感受老叢獨特歲月味",
+        quote: "「客至心常熱，人走茶不涼。」—— 民間茶對",
+        healthTip: "老叢水仙茶性溫和滑柔，舒緩秋分時節的呼吸道乾癢。"
+      },
+      {
+        solarTerm: "寒露 ‧ 松煙",
+        teaName: "正山小種 (松煙香)",
+        subTitle: "紅茶鼻祖，松煙松膏香",
+        flavor: "松煙香、桂圓乾甜香、湯色紅濃",
+        brewAdvice: "水溫 92~95°C 沖泡，配精美瓷杯體驗古韻",
+        quote: "「正山小種傳歐陸，紅湯煙香醉皇家。」—— 茶史紀事",
+        healthTip: "全發酵溫性紅茶，能暖胃補氣、促進全身血液循環。"
+      },
+      {
+        solarTerm: "霜降 ‧ 香妃",
+        teaName: "祁門紅茶 (祁紅)",
+        subTitle: "世界三大高香紅茶之一",
+        flavor: "祁紅香、蜜糖香、果香複合濃郁",
+        brewAdvice: "水溫 90~95°C 溫注，可純飲或加奶調飲",
+        quote: "「祁紅特銳香氣高，傾倒英倫皇家宴。」—— 茶詩采風",
+        healthTip: "霜降天氣轉冷，飲用祁紅可禦寒保暖、幫助蛋白質與脂肪消化。"
+      },
+      {
+        solarTerm: "立冬 ‧ 翠片",
+        teaName: "六安瓜片",
+        subTitle: "單片採摘，無芽無梗",
+        flavor: "熟板栗香、清香濃厚、湯質濃郁",
+        brewAdvice: "水溫 85~90°C，杯泡慢斟",
+        quote: "「直如瓜子形奇特，香似栗濃韻自長。」—— 徽茶歌",
+        healthTip: "富含茶多酚與多種抗氧化成分，能增強免疫力以迎冬寒。"
+      },
+      {
+        solarTerm: "小雪 ‧ 黃茶之冠",
+        teaName: "君山銀針 (黃茶)",
+        subTitle: "黃湯黃葉，三起三落奇觀",
+        flavor: "杏黃明亮、甜和甘醇、毫香隱約",
+        brewAdvice: "水溫 85~90°C 玻璃杯沖泡，觀賞芽頭懸立",
+        quote: "「君山茶香飄洞庭，三起三落舞飛昇。」—— 湖湘茶傳",
+        healthTip: "黃茶經悶黃工序產生大量消化酵素，對脾胃虛弱者特別溫和。"
+      },
+      {
+        solarTerm: "大雪 ‧ 陳香暖胃",
+        teaName: "雲南勐海熟普洱",
+        subTitle: "渥堆發酵，陳香濃郁綿密",
+        flavor: "樟香、棗香、湯質黏稠滑順",
+        brewAdvice: "沸水 100°C 潤茶兩次，厚壁紫砂壺高溫沖泡",
+        quote: "「老普洱茶溫如玉，百疾不乾歲暮深。」—— 普洱茶經",
+        healthTip: "大雪嚴寒，熟普洱含豐富茶多糖與益生菌代謝物，養胃暖胃。"
+      },
+      {
+        solarTerm: "冬至 ‧ 野韻",
+        teaName: "雲南易武生普洱 (古樹)",
+        subTitle: "古樹茶香，野韻悠長",
+        flavor: "蜜香、山野氣韻、回甘生津綿延不絕",
+        brewAdvice: "水溫 95~100°C 高沖，控秒出湯品味層次",
+        quote: "「易武柔甜冠六山，古樹氣韻透心間。」—— 雲南茶記",
+        healthTip: "冬至陽氣初生，古樹生普能清熱通氣、提神降脂。"
+      },
+      {
+        solarTerm: "小寒 ‧ 炭焙古韻",
+        teaName: "凍頂烏龍茶 (中焙火)",
+        subTitle: "傳統半球形，成熟果香與焙火香",
+        flavor: "焙火香、炒米香、喉韻甘潤深厚",
+        brewAdvice: "水溫 95~100°C 沸水高沖，宜用朱泥壺",
+        quote: "「凍頂山頭雲霧深，炭火慢烘透茶心。」—— 台灣茶歌",
+        healthTip: "中度烘焙去除了涼性，極適合小寒時節體寒者溫服。"
+      },
+      {
+        solarTerm: "大寒 ‧ 潤燥",
+        teaName: "福鼎白牡丹",
+        subTitle: "綠葉夾銀毫，形態如花朵",
+        flavor: "毫香花香兼備、清甜醇爽、滋味鮮柔",
+        brewAdvice: "水溫 90°C 溫和注水，亦可煮飲體驗陳香",
+        quote: "「白牡丹開香滿室，歲末寒冬一盞溫。」—— 閩茶隨筆",
+        healthTip: "歲末大寒宜平補潤燥，白牡丹兼具清熱與滋潤功用。"
+      },
+      {
+        solarTerm: "春萌 ‧ 杉木氣",
+        teaName: "杉林溪高山烏龍",
+        subTitle: "杉木林環抱，冷香顯赫",
+        flavor: "冷杉香、高山冷氣、清甜回甘",
+        brewAdvice: "水溫 95°C 高沖，展現高山林木氣息",
+        quote: "「杉林深處茶香發，一滴清甘入肺腑。」—— 杉林茶吟",
+        healthTip: "高山林氣富含負離子感官調劑，能解鬱舒肝、醒腦明目。"
+      },
+      {
+        solarTerm: "春潤 ‧ 香椽韻",
+        teaName: "永春佛手",
+        subTitle: "葉大如掌，帶天然香椽柑橘香",
+        flavor: "香椽果香、酸甜生津、湯質甘厚",
+        brewAdvice: "水溫 95°C 沖泡，紫砂壺或蓋碗皆宜",
+        quote: "「佛手名茶香柑橘，一盞清湯潤喉舌。」—— 閩南茶諺",
+        healthTip: "理氣化痰、舒肝和胃，極適合春季濕氣較重時飲用。"
+      },
+      {
+        solarTerm: "春醒 ‧ 蜜果",
+        teaName: "鳳凰單叢 (蜜蘭香)",
+        subTitle: "嶺南獨特單株采摘，蜜蘭雙絕",
+        flavor: "濃郁蜂蜜香、蘭花香、山韻強烈",
+        brewAdvice: "水溫 100°C 沸水快沖快出，展現單叢霸氣",
+        quote: "「鳳凰山頂單叢樹，蜜蘭芬芳醉客心。」—— 潮汕茶經",
+        healthTip: "富含芳香物質，能開竅提神、促進脂肪分解。"
+      },
+      {
+        solarTerm: "華夏 ‧ 奇香",
+        teaName: "鳳凰單叢 (鴨屎香 / 銀花香)",
+        subTitle: "名奇香奇，高銳銀花香",
+        flavor: "高銳金銀花香、甜潤爽口、韻味持久",
+        brewAdvice: "水溫 100°C 蓋碗高沖，切忌悶泡",
+        quote: "「名俗香奇天下響，鴨屎香飄萬里晴。」—— 潮州茶話",
+        healthTip: "高香物質能解表散邪、行氣活血，令人精神振奮。"
+      },
+      {
+        solarTerm: "穀雨 ‧ 魁首",
+        teaName: "太平猴魁",
+        subTitle: "兩葉抱一芽，平扁挺直",
+        flavor: "蘭花香濃郁、滋味醇厚、回味有猴韻",
+        brewAdvice: "水溫 85°C 直筒玻璃杯豎立沖泡",
+        quote: "「太平猴魁成雙對，龍飛鳳舞入杯中。」—— 太平茶歌",
+        healthTip: "葉綠素與胺基酸含量高，能清肝明目、消除疲勞。"
+      },
+      {
+        solarTerm: "暮春 ‧ 滇紅",
+        teaName: "雲南滇紅金針",
+        subTitle: "芽頭金黃挺直，滿披金毫",
+        flavor: "麥芽糖香、滇紅特有果香、湯質濃醇",
+        brewAdvice: "水溫 90°C 溫和沖泡，湯色紅艷明亮",
+        quote: "「滇南金針亮如金，濃醇蜜香暖人心。」—— 滇茶選粹",
+        healthTip: "全發酵紅茶，含豐富茶紅素與茶黃素，具有良好護心與抗氧化作用。"
+      },
+      {
+        solarTerm: "盛夏 ‧ 飄香",
+        teaName: "桂花烏龍",
+        subTitle: "優質烏龍窨製天然金桂",
+        flavor: "甜美桂花香、烏龍茶韻、甜潤綿長",
+        brewAdvice: "水溫 90~95°C 沖泡，香氣四溢",
+        quote: "「桂子月中落，天香雲外飄。」—— 宋詩隨筆",
+        healthTip: "桂花性溫，能溫中散寒、暖胃止痛、清新口氣。"
+      },
+      {
+        solarTerm: "歲月 ‧ 樟韻",
+        teaName: "陳年老茶 (三十年老烏龍)",
+        subTitle: "歲月淬鍊，沉香梅藥香",
+        flavor: "陳香、梅子酸甜、樟木香、湯質軟綿",
+        brewAdvice: "水溫 100°C 沸水慢泡，或用紫砂壺煎煮",
+        quote: "「三十年光陰一盞茶，歲月沉香透心花。」—— 老茶客談",
+        healthTip: "經過數十年自然陳化，茶性極度溫和，順氣安神、暖胃養生。"
+      },
+      {
+        solarTerm: "伏天 ‧ 理氣",
+        teaName: "陳皮普洱 (小青柑)",
+        subTitle: "新會柑皮融合熟普洱",
+        flavor: "清新柑香、陳香濃郁、甘甜理氣",
+        brewAdvice: "水溫 100°C 沸水整顆或破皮沖泡",
+        quote: "「小青柑亮如珍珠，柑香普韻雙絕妙。」—— 嶺南茶說",
+        healthTip: "新會柑皮揮發油豐富，能健脾理氣、燥濕化痰、解膩開胃。"
+      },
+      {
+        solarTerm: "秋高 ‧ 桂香",
+        teaName: "舞鶴蜜香紅茶",
+        subTitle: "花蓮舞鶴台地，天然蜜果芬芳",
+        flavor: "濃醇蜜香、熟果甜香、口感柔順",
+        brewAdvice: "水溫 90°C 慢沖，不加糖即有自然甘甜",
+        quote: "「舞鶴山風吹蜜香，紅湯甘甜潤靈魂。」—— 花蓮茶誌",
+        healthTip: "富含天然茶黃素，具抗氧化作用，且發酵完全不刺激胃部。"
+      },
+      {
+        solarTerm: "霜月 ‧ 高山冷香",
+        teaName: "梨山高冷烏龍",
+        subTitle: "海拔2000公尺以上，果香濃郁",
+        flavor: "水梨甜香、冷霜氣強、回甘綿密",
+        brewAdvice: "水溫 95°C 高沖，高山冷香四溢",
+        quote: "「梨山冰霜淬佳茗，一飲甘露勝瓊漿。」—— 台灣高山茶記",
+        healthTip: "高海拔低溫使茶葉葉肉肥厚，膠質豐富，有助於潤燥生津。"
+      },
+      {
+        solarTerm: "臘月 ‧ 珍稀黃茶",
+        teaName: "霍山黃芽",
+        subTitle: "徽州名茶，黃葉黃湯微發酵",
+        flavor: "雀舌黃亮、清香帶甜、滋味鮮醇",
+        brewAdvice: "水溫 85°C 沖泡，靜置 3 分鐘出湯",
+        quote: "「霍山黃芽金黃嫩，一品清芬入夢來。」—— 黃山茶品選",
+        healthTip: "含天然脾胃消化酶，歲末年關餐宴後飲用，有助於去油解膩。"
+      }
+    ];
+
+    const TEA_QUOTES_AND_WISDOM = [
+      {
+        quote: "「茶味即世味，煎茶如鍛心。急水失其柔，慢火發其真。」",
+        author: "許次紓《茶疏》",
+        healthTip: "品茶時保持呼吸平緩，能刺激副交感神經，達到減壓與穩定心率之效。"
+      },
+      {
+        quote: "「一碗喉吻潤，二碗破孤悶，三碗搜枯腸，唯有文字五千卷。」",
+        author: "盧仝《七碗茶詩》",
+        healthTip: "茶葉中的 L-茶胺酸能促進腦部 alpha 波產生，讓人處於放鬆但專注的狀態。"
+      },
+      {
+        quote: "「茶之為用，味至寒，為飲最宜。人勃發渴，喝之即止。」",
+        author: "陸羽《茶經》",
+        healthTip: "餐後 30 分鐘再品茶，有助於消化脂膩，同時不干擾人體對鐵質的吸收。"
+      },
+      {
+        quote: "「獨攜天上小團月，來試人間第二泉。」",
+        author: "蘇軾《宋詞選》",
+        healthTip: "沖泡水質對茶湯影響深遠，軟水（TDS 約 30-80）最能忠實展現茶葉原味。"
+      },
+      {
+        quote: "「香分花上露，水吸石中泉。坐客茶能醉，開軒花正妍。」",
+        author: "寒山子",
+        healthTip: "溫杯燙盞不僅能衛生殺菌，更能防止茶湯倒入時溫度驟降而影響風味香氣。"
+      },
+      {
+        quote: "「休對故人思故國，且將新火試新茶。詩酒趁年華。」",
+        author: "蘇軾《望江南》",
+        healthTip: "春季宜飲花茶或輕發酵烏龍，有助升發陽氣、疏肝解郁。"
+      },
+      {
+        quote: "「住山罷採茶，至此方安心。莫言烹水苦，苦極甜隨深。」",
+        author: "齊己《茶詩》",
+        healthTip: "回甘（生津）源於茶多酚與蛋白質結合後刺激唾液腺分泌，苦盡甘來亦是健康指標。"
+      },
+      {
+        quote: "「竹下忘言對紫茶，全勝羽客醉流霞。」",
+        author: "錢起《與趙莒茶宴》",
+        healthTip: "紫芽茶富含花青素，具備優異抗氧化能力，口感微苦但回甘迅猛。"
+      },
+      {
+        quote: "「寒夜客來茶當酒，竹爐湯沸火初紅。」",
+        author: "杜耒《寒夜》",
+        healthTip: "冬日或夜間品茶宜選熟普洱或老紅茶，溫中散寒，不傷胃亦不易影響睡眠。"
+      },
+      {
+        quote: "「無由持一碗，寄與愛茶人。」",
+        author: "白居易《山泉煎茶有懷》",
+        healthTip: "與友共享茶湯可增進心理連結，茶聚中的慢步調能大幅降低焦慮感。"
+      },
+      {
+        quote: "「淡中有味茶偏好，清極不知福自多。」",
+        author: "陳繼儒《小窗幽記》",
+        healthTip: "避免飲用過濃或過燙（高於65°C）的茶湯，以保護食道黏膜與胃壁健康。"
+      },
+      {
+        quote: "「被酒莫驚春睡重，賭書消得散茶香。」",
+        author: "納蘭性德《浣溪沙》",
+        healthTip: "解酒不宜飲濃茶，淡紅茶或溫水更利於肝臟代謝與補充水分。"
+      },
+      {
+        quote: "「君子之交淡如水，茶人之意重在真。」",
+        author: "茶道諺語",
+        healthTip: "空腹不宜飲過多強發酵或高茶多酚的綠茶，以免引起「茶醉」與胃部不適。"
+      },
+      {
+        quote: "「草木之中有精華，一葉翻騰見天地。」",
+        author: "《茶話》",
+        healthTip: "大葉種普洱茶富含茶多酚與茶褐素，適量飲用有助於調節血脂與腸道菌群。"
+      },
+      {
+        quote: "「茶涼可再熱，心清無處塵。」",
+        author: "禪茶俗語",
+        healthTip: "午後未時（13:00-15:00）飲用清香型烏龍或白茶，能清熱解倦、提升專注力。"
+      },
+      {
+        quote: "「石泉槐火發新香，半榻雲鬆午夢長。」",
+        author: "陸游《雜賦》",
+        healthTip: "午後茶飲可配合 15 分鐘短暫午休，咖啡因與 L-茶胺酸能提升復甦清醒度。"
+      },
+      {
+        quote: "「浮生若茶，初嚐微苦，回味甘甜。」",
+        author: "茶禪一味",
+        healthTip: "茶中的兒茶素（EGCG）是天然抗氧化劑，能幫助清除自由基並維持活力。"
+      },
+      {
+        quote: "「茶不語，自能清心；水無聲，自能遠俗。」",
+        author: "清語",
+        healthTip: "專注於觀茶色、聞茶香的「正念品茶」過程，能有效舒緩緊張的交感神經。"
+      },
+      {
+        quote: "「煎茶聽雨，時光簡靜。」",
+        author: "《隨園食單》",
+        healthTip: "雨天或濕氣重時，飲用武夷岩茶或焙火烏龍有助於溫中祛濕、舒緩脾胃。"
+      },
+      {
+        quote: "「山中無歷日，寒盡不知年。一壺山泉水，品盡千古仙。」",
+        author: "古道茶詩",
+        healthTip: "使用山泉水或弱鹼性礦泉水沖泡，微量礦物質能使茶湯口感更圓潤滑順。"
+      },
+      {
+        quote: "「靜坐品茶，聽風觀雨。心若無塵，茶香隨處發。」",
+        author: "茶境古語",
+        healthTip: "換季交替時，飲用性質溫和的陳年老茶或老白茶，有助於維持身體適應力。"
+      },
+      {
+        quote: "「坐酌泠泠水，看煎瑟瑟塵。無由持一碗，寄與愛茶人。」",
+        author: "白居易《山泉煎茶有懷》",
+        healthTip: "注水時採用低斟手法可減少茶湯鎖入過多氣泡，讓茶湯口感更加細膩綿密。"
+      },
+      {
+        quote: "「汲井漱寒齒，清心聽曉鐘。烹茶留客坐，意在山水間。」",
+        author: "柳宗元《晨起》",
+        healthTip: "晨起刷牙後一小時，品飲一杯淡溫的紅茶或烏龍茶，可溫暖腸胃並促進代謝。"
+      },
+      {
+        quote: "「不生不死，非色非空。一碗清茶，見心明性。」",
+        author: "《禪茶錄》",
+        healthTip: "茶多酚具備良好的抑菌作用，品茶後適當漱口能保護口腔環境與牙齦健康。"
+      },
+      {
+        quote: "「松花釀酒，春水煎茶。」",
+        author: "張可久《人月圓》",
+        healthTip: "水質偏軟時配合低溫快沖，最能突顯綠茶與高山茶的鮮爽度與花果香。"
+      },
+      {
+        quote: "「一壺濁酒喜相逢，半盞清茶論古今。」",
+        author: "《臨江仙》",
+        healthTip: "久坐工作或用眼過度時，適量飲用白茶或搭配枸杞菊花，能緩解眼睛乾澀。"
+      },
+      {
+        quote: "「香於九畹芳蘭氣，圓如三千大千界。」",
+        author: "黃庭堅《雙井茶》",
+        healthTip: "高香型茶款（如東方美人、單叢）含有豐富香氣物質，聞香過程有助於舒緩神經。"
+      },
+      {
+        quote: "「落日平台上，春風一草堂。煎茶留客坐，意在山水長。」",
+        author: "杜甫《重過何氏》",
+        healthTip: "運動或大量出汗後，飲用室溫下的淡烏龍或冷泡茶，能及時補充水分與茶多酚。"
+      },
+      {
+        quote: "「嫩芽香莉伏，甘露潤枯腸。莫道茶味薄，入喉有餘香。」",
+        author: "《品茶詩》",
+        healthTip: "冷泡茶浸泡過程產生的游離茶胺酸比例較高，且苦澀味少，口感更為甘甜。"
+      },
+      {
+        quote: "「慢品人間煙火，獨享一盞茶香。」",
+        author: "《茶道心悟》",
+        healthTip: "建立每日定時品茶的小儀式，有助於劃分工作與休息邊界，建立良好的生活節奏。"
+      },
+      {
+        quote: "「九刷七泡，方顯真韻；慢斟細品，始知茶味。」",
+        author: "《潮州工夫茶經》",
+        healthTip: "工夫茶小杯慢飲，能讓茶湯與口腔黏膜充分接觸，刺激味蕾同時避免一次性大量飲水加重腎臟負擔。"
+      },
+      {
+        quote: "「茶性發於水，八分之茶，遇十分之水，茶亦十分矣。」",
+        author: "張源《茶錄》",
+        healthTip: "選擇活性高、水質軟的天然礦泉水沖泡，能完整萃取茶多酚與胺基酸，風味與養生價值兼具。"
+      },
+      {
+        quote: "「味濃香永，醉鄉路遠，厥狀惟肖。」",
+        author: "白居易《太湖石》",
+        healthTip: "老白茶富含黃酮類化合物，具有顯著的抗氧化與舒緩呼吸道效果，適合季節交替時飲用。"
+      },
+      {
+        quote: "「茶之為物，吐高山之雲霧，凝大地之精華。」",
+        author: "陸羽《茶經》",
+        healthTip: "高山茶日照時間短、溫差大，苦澀味低的茶胺酸含量特別高，能帶來更佳的舒壓放鬆效果。"
+      },
+      {
+        quote: "「清泉綠茶，客至即烹，心靈交會，勝於萬言。」",
+        author: "民間茶諺",
+        healthTip: "綠茶中兒茶素未經發酵保留完整，但刺激性較強，建議飯後半小時飲用更護胃。"
+      },
+      {
+        quote: "「石泉遠流，竹爐夜沸。茶清香發，客去留影。」",
+        author: "蘇軾《試茶》",
+        healthTip: "夜間若欲品茶，可選擇熟普洱、老茶或迪卡夫（去咖啡因）茶款，減少對睡眠質量的影響。"
+      },
+      {
+        quote: "「一壺濁酒喜相逢，古今多少事，都付笑談中。一盞清茶思往事，歲月何悠悠。」",
+        author: "《茶酒明志》",
+        healthTip: "以茶代酒不僅能保護肝臟功能，還能促進體內酒精代謝物的排出。"
+      },
+      {
+        quote: "「火前茶嫩，水後湯清。」",
+        author: "《茶道講義》",
+        healthTip: "清明前採摘的嫩芽含有豐富的新鮮揮發油與茶胺酸，能提神醒腦且口感鮮爽。"
+      },
+      {
+        quote: "「坐久不知香在室，推窗時有綠隨人。」",
+        author: "于謙《品茶》",
+        healthTip: "品茶環境保持通風與適度濕度，能讓鼻腔黏膜保持濕潤，更敏銳地捕捉茶葉的沉香與花香。"
+      },
+      {
+        quote: "「烹茶張捲，清心寡欲。」",
+        author: "朱權《茶譜》",
+        healthTip: "讀書或長時閱讀時搭配品茶，茶多酚有助於減緩眼部疲勞，提高大腦運作效率。"
+      },
+      {
+        quote: "「小鼎煎茶麵曲池，白雲一片去悠悠。」",
+        author: "白居易《對茶》",
+        healthTip: "水沸後微降溫（約 85°C-90°C）沖泡細嫩綠茶或白茶，可防止高溫破壞維生素 C 與茶胺酸。"
+      },
+      {
+        quote: "「茶道貴在自然，順應天時，合乎地利。」",
+        author: "《茶道宗旨》",
+        healthTip: "順應二十四節氣選擇茶款，如春喝花茶、夏喝綠茶、秋喝烏龍、冬喝紅茶，符合中醫天人相應觀念。"
+      },
+      {
+        quote: "「一葉落而知秋，一茶香而知心。」",
+        author: "茶人諺語",
+        healthTip: "秋季天高氣爽易生秋燥，飲用蜜香紅茶或凍頂烏龍能生津止渴、滋陰潤燥。"
+      },
+      {
+        quote: "「汲水煎茶，心安即是歸處。」",
+        author: "《禅茶合一》",
+        healthTip: "每日預留 15-20 分鐘專注於泡茶的動作，能形成行為儀式感，有效降低皮質醇（壓力荷爾蒙）。"
+      },
+      {
+        quote: "「清香入骨，餘味繞樑。」",
+        author: "《武夷岩茶誌》",
+        healthTip: "岩茶（如肉桂、水仙）經重焙火後富含吡嗪類化合物，有助於暖胃散寒並促進血液循環。"
+      },
+      {
+        quote: "「茶清神爽，意定心安。」",
+        author: "《神農本草經》",
+        healthTip: "茶葉中的咖啡因與茶胺酸具有協同作用，能提供溫和持久的提神效果，不會引起心悸或劇烈焦慮。"
+      },
+      {
+        quote: "「煎水泡茶，汲泉烹雪，皆是生活真趣。」",
+        author: "袁枚《隨園食單》",
+        healthTip: "低溫冷泡（4°C 浸泡 4-8 小時）可大幅減少咖啡因與單寧酸釋出，口感甘甜且不易傷胃。"
+      },
+      {
+        quote: "「松下清泉石上流，壺中日月夜沉沉。」",
+        author: "《山居品茶》",
+        healthTip: "選用透氣性佳的紫砂壺沖泡重發酵或老茶，能吸附雜味並提升茶湯口感的醇厚度與滑順感。"
+      },
+      {
+        quote: "「淡泊以明志，寧靜以致遠，茶香以清心。」",
+        author: "《茶人修養》",
+        healthTip: "飲茶前後補充足量溫開水，有助於促進新陳代謝，並維持體內水水分平衡。"
+      },
+      {
+        quote: "「一茶一飯，皆是修行；一草一木，皆有禪意。」",
+        author: "《茶禪心語》",
+        healthTip: "保持規律且適量的飲茶習慣（每日約 3-4 杯），有助於長期維護心血管健康與腸道微生態。"
+      }
+    ];
+
+    let appData = {
+      points: 0,
+      unlockedCards: ['c1'],
+      equippedTitle: '【初入茶道】',
+      history: [],
+      teawareList: JSON.parse(JSON.stringify(DEFAULT_TEAWARE)),
+      currentSession: null,
+      customOptions: JSON.parse(JSON.stringify(DEFAULT_CUSTOM_OPTIONS)),
+      customTags: [...DEFAULT_TAGS],
+      lastDailySaveDate: '',
+      lastBrewPointDate: ''
+    };
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function toggleSoundMute() {
+      isMuted = !isMuted;
+      const btn = document.getElementById('soundToggleBtn');
+      if (isMuted) {
+        btn.innerHTML = "🔇 靜音中";
+        btn.className = "text-xs px-2 py-0.5 rounded border border-red-300 bg-red-100 text-red-700";
+      } else {
+        btn.innerHTML = "🔊 音效開啟";
+        btn.className = "text-xs px-2 py-0.5 rounded border border-[#D5CFC5] bg-[#EAE6DF] hover:bg-[#E0DCD3]";
+      }
+    }
+
+    function playSongSound(type) {
+      if (isMuted) return;
+      try {
+        initAudio();
+        const now = audioCtx.currentTime;
+
+        if (type === 'flip') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.exponentialRampToValueAtTime(1760, now + 0.1);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.6);
+        } else if (type === 'alarm') {
+          [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.12);
+            gain.gain.setValueAtTime(0.2, now + i * 0.12);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.8);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + i * 0.12);
+            osc.stop(now + i * 0.12 + 0.8);
+          });
+        } else if (type === 'ssr') {
+          const freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+          freqs.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.1);
+            gain.gain.setValueAtTime(0.15, now + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 1.2);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + i * 0.1);
+            osc.stop(now + i * 0.1 + 1.2);
+          });
+        }
+      } catch (e) {
+        console.warn('AudioContext prevented by browser interaction policy', e);
+      }
+    }
+
+    function saveStateKey(key, val) {
+      try {
+        localStorage.setItem(key, JSON.stringify(val));
+      } catch (e) {
+        console.error('Failed to save to localStorage:', e);
+      }
+    }
+
+    function loadAllStorageData() {
+      try {
+        const pts = localStorage.getItem(STORAGE_KEYS.POINTS);
+        appData.points = pts !== null ? JSON.parse(pts) : 0;
+
+        const cards = localStorage.getItem(STORAGE_KEYS.UNLOCKED_CARDS);
+        appData.unlockedCards = cards !== null ? JSON.parse(cards) : ['c1'];
+
+        const title = localStorage.getItem(STORAGE_KEYS.EQUIPPED_TITLE);
+        appData.equippedTitle = title !== null ? JSON.parse(title) : '【初入茶道】';
+
+        const hist = localStorage.getItem(STORAGE_KEYS.TEA_HISTORY);
+        appData.history = hist !== null ? JSON.parse(hist) : [];
+
+        const pots = localStorage.getItem(STORAGE_KEYS.TEAWARE_LIST);
+        appData.teawareList = pots !== null ? JSON.parse(pots) : JSON.parse(JSON.stringify(DEFAULT_TEAWARE));
+
+        const opts = localStorage.getItem(STORAGE_KEYS.CUSTOM_OPTIONS);
+        appData.customOptions = opts !== null ? JSON.parse(opts) : JSON.parse(JSON.stringify(DEFAULT_CUSTOM_OPTIONS));
+
+        const lastSave = localStorage.getItem(STORAGE_KEYS.LAST_DAILY_SAVE_DATE);
+        appData.lastDailySaveDate = lastSave !== null ? JSON.parse(lastSave) : '';
+
+        const lastBrewPt = localStorage.getItem(STORAGE_KEYS.LAST_BREW_POINT_DATE);
+        appData.lastBrewPointDate = lastBrewPt !== null ? JSON.parse(lastBrewPt) : '';
+
+        const currentSess = localStorage.getItem(STORAGE_KEYS.CURRENT_SESSION);
+        if (currentSess) {
+          appData.currentSession = JSON.parse(currentSess);
+        } else {
+          initNewSessionState();
+        }
+      } catch (e) {
+        console.error('Error loading storage data:', e);
+        initNewSessionState();
+      }
+    }
+
+    function initNewSessionState() {
+      appData.currentSession = {
+        id: 'sess_' + Date.now(),
+        date: getTodayDateString(),
+        teaName: '',
+        teaCategory: appData.customOptions.teaCategory[0] || '烏龍茶',
+        teaOrigin: '',
+        teaFermentation: appData.customOptions.teaFermentation[0] || '輕發酵 (15-25%)',
+        teaRoast: appData.customOptions.teaRoast[0] || '生茶/無焙火',
+        teawareId: appData.teawareList[0]?.id || 'tw_1',
+        teaWeight: 8.0,
+        waterTemp: 95,
+        waterType: appData.customOptions.waterType[0] || '純淨水/RO水',
+        currentRound: 1,
+        scores: {
+          dry: 8.5,
+          aroma: 9.0,
+          flavor: 8.5,
+          mouthfeel: 8.0,
+          throat: 9.0,
+          qi: 8.5
+        },
+        rounds: [],
+        selectedPourMethod: appData.customOptions.pourMethod[0] || '高沖環繞'
+      };
+      saveStateKey(STORAGE_KEYS.CURRENT_SESSION, appData.currentSession);
+    }
+
+    function restoreSessionToUI(s) {
+      if (!s) return;
+      document.getElementById('teaName').value = s.teaName || '';
+      document.getElementById('teaOrigin').value = s.teaOrigin || '';
+      document.getElementById('teaWeight').value = s.teaWeight || 8.0;
+      document.getElementById('waterTemp').value = s.waterTemp || 95;
+
+      if (s.teaCategory) document.getElementById('teaCategory').value = s.teaCategory;
+      if (s.teaFermentation) document.getElementById('teaFermentation').value = s.teaFermentation;
+      if (s.teaRoast) document.getElementById('teaRoast').value = s.teaRoast;
+      if (s.waterType) document.getElementById('waterType').value = s.waterType;
+
+      if (s.teawareId) document.getElementById('teawareSelect').value = s.teawareId;
+      handleTeawareChange();
+
+      document.getElementById('currentBrewRound').textContent = s.currentRound || 1;
+
+      if (s.scores) {
+        document.getElementById('score_dry').value = s.scores.dry;
+        document.getElementById('score_aroma').value = s.scores.aroma;
+        document.getElementById('score_flavor').value = s.scores.flavor;
+        document.getElementById('score_mouthfeel').value = s.scores.mouthfeel;
+        document.getElementById('score_throat').value = s.scores.throat;
+        document.getElementById('score_qi').value = s.scores.qi;
+      }
+
+      updateRadarChart();
+      updateWaterRatio();
+      renderBrewRoundsTable();
+    }
+
+    function initDropdownOptions() {
+      const fields = ['teaCategory', 'teaFermentation', 'teaRoast', 'waterType', 'pourMethod'];
+      fields.forEach(field => {
+        const select = document.getElementById(field === 'pourMethod' ? 'pourMethodSelect' : field);
+        if (!select) return;
+        select.innerHTML = '';
+        const options = appData.customOptions[field] || DEFAULT_CUSTOM_OPTIONS[field] || [];
+        options.forEach(opt => {
+          select.innerHTML += `<option value="${opt}">${opt}</option>`;
+        });
+      });
+
+      const catFilter = document.getElementById('historyCategoryFilter');
+      if (catFilter) {
+        catFilter.innerHTML = '<option value="ALL">全部茶類</option>';
+        (appData.customOptions.teaCategory || []).forEach(cat => {
+          catFilter.innerHTML += `<option value="${cat}">${cat}</option>`;
+        });
+      }
+    }
+
+    function handleSelectChange(selectElem, fieldKey) {
+      updateCurrentSessionData();
+    }
+
+    function addCustomOption(fieldKey) {
+      showPrompt(`新增自訂${fieldKey}選項`, '', (val) => {
+        if (!appData.customOptions[fieldKey]) {
+          appData.customOptions[fieldKey] = [];
+        }
+        if (!appData.customOptions[fieldKey].includes(val)) {
+          appData.customOptions[fieldKey].push(val);
+          saveStateKey(STORAGE_KEYS.CUSTOM_OPTIONS, appData.customOptions);
+          initDropdownOptions();
+          const elem = document.getElementById(fieldKey === 'pourMethod' ? 'pourMethodSelect' : fieldKey);
+          if (elem) elem.value = val;
+          updateCurrentSessionData();
+          showToast(`已新增選項：「${val}」`);
+        }
+      });
+    }
+
+    function initTeawareSelect() {
+      const select = document.getElementById('teawareSelect');
+      if (!select) return;
+      select.innerHTML = '';
+      appData.teawareList.forEach(pot => {
+        select.innerHTML += `<option value="${pot.id}">${pot.name} (${pot.volume || pot.capacity || 140}ml)</option>`;
+      });
+      handleTeawareChange();
+    }
+
+    function handleTeawareChange() {
+      const select = document.getElementById('teawareSelect');
+      if (!select) return;
+      const potId = select.value;
+      const pot = appData.teawareList.find(p => p.id === potId);
+      if (pot) {
+        document.getElementById('displayClay').textContent = pot.clay || pot.material || '陶瓷';
+        document.getElementById('displayVolume').textContent = pot.volume || pot.capacity || 140;
+        document.getElementById('displayBrews').textContent = pot.brews || 0;
+        if (appData.currentSession) {
+          appData.currentSession.teawareId = pot.id;
+          saveStateKey(STORAGE_KEYS.CURRENT_SESSION, appData.currentSession);
+        }
+      }
+      updateWaterRatio();
+    }
+
+    function openAddTeawareModal() {
+      document.getElementById('newPotName').value = '';
+      document.getElementById('newPotClay').value = '';
+      document.getElementById('newPotVolume').value = '140';
+      document.getElementById('newPotBrews').value = '0';
+      document.getElementById('teawareModal').classList.remove('hidden');
+    }
+
+    function closeAddTeawareModal() {
+      document.getElementById('teawareModal').classList.add('hidden');
+    }
+
+    function saveNewTeaware() {
+      const name = document.getElementById('newPotName').value.trim();
+      const clay = document.getElementById('newPotClay').value.trim() || '通用陶泥';
+      const volume = parseFloat(document.getElementById('newPotVolume').value) || 140;
+      const brews = parseInt(document.getElementById('newPotBrews').value) || 0;
+
+      if (!name) {
+        showToast('⚠️ 請輸入壺具名稱！');
+        return;
+      }
+
+      const newPot = {
+        id: 'tw_' + Date.now(),
+        name: name,
+        clay: clay,
+        volume: volume,
+        brews: brews
+      };
+
+      appData.teawareList.push(newPot);
+      saveStateKey(STORAGE_KEYS.TEAWARE_LIST, appData.teawareList);
+      initTeawareSelect();
+      document.getElementById('teawareSelect').value = newPot.id;
+      handleTeawareChange();
+      closeAddTeawareModal();
+      showToast('🎉 新增壺具成功！');
+    }
+
+    function deleteSelectedTeaware() {
+      const select = document.getElementById('teawareSelect');
+      const potId = select.value;
+      if (appData.teawareList.length <= 1) {
+        showToast('⚠️ 至少需保留一個預設壺具。');
+        return;
+      }
+      showConfirm('確定要刪除選取的壺具嗎？', () => {
+        appData.teawareList = appData.teawareList.filter(p => p.id !== potId);
+        saveStateKey(STORAGE_KEYS.TEAWARE_LIST, appData.teawareList);
+        initTeawareSelect();
+        showToast('已刪除壺具。');
+      });
+    }
+
+    let timerInterval = null;
+    let timerTargetDuration = 25;
+    let timerRemainingSeconds = -25;
+    let timerIsRunning = false;
+    let timerIsOvertime = false;
+
+    function setTimerDuration(val) {
+      const duration = parseInt(val) || 25;
+      timerTargetDuration = duration;
+      if (!timerIsRunning) {
+        resetTimer();
+      }
+    }
+
+    function resetTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      timerIsRunning = false;
+      timerIsOvertime = false;
+      timerRemainingSeconds = -timerTargetDuration;
+
+      const btn = document.getElementById('timerBtn');
+      btn.textContent = '開始注水';
+      btn.className = 'ru-btn px-8 py-2.5 rounded text-sm font-medium tracking-wider';
+
+      const statusText = document.getElementById('timerStatusNotice');
+      statusText.textContent = '準備注水';
+      statusText.className = 'text-xs text-gray-500 mt-1 h-4 font-mono';
+
+      updateTimerDisplay();
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timerBtn');
+      if (timerIsRunning) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerIsRunning = false;
+        btn.textContent = '繼續注水';
+        btn.className = 'ru-btn-gold px-8 py-2.5 rounded text-sm font-medium tracking-wider';
+        document.getElementById('timerStatusNotice').textContent = '計時已暫停';
+      } else {
+        initAudio();
+        timerIsRunning = true;
+        btn.textContent = '暫停計時';
+        btn.className = 'bg-amber-600 hover:bg-amber-700 text-white px-8 py-2.5 rounded text-sm font-medium tracking-wider';
+        document.getElementById('timerStatusNotice').textContent = timerRemainingSeconds < 0 ? '浸泡中...' : '逾時萃取中...';
+
+        timerInterval = setInterval(() => {
+          timerRemainingSeconds++;
+          if (timerRemainingSeconds === 0 && !timerIsOvertime) {
+            timerIsOvertime = true;
+            playSongSound('alarm');
+          }
+          updateTimerDisplay();
+        }, 1000);
+      }
+    }
+
+    function updateTimerDisplay() {
+      const display = document.getElementById('timerDisplay');
+      const statusNotice = document.getElementById('timerStatusNotice');
+
+      const absSec = Math.abs(timerRemainingSeconds);
+      const m = String(Math.floor(absSec / 60)).padStart(2, '0');
+      const s = String(absSec % 60).padStart(2, '0');
+
+      if (timerRemainingSeconds < 0) {
+        display.textContent = `-${m}:${s}`;
+        display.className = 'text-6xl font-mono font-light text-[#2C3333] transition-colors';
+        statusNotice.textContent = timerIsRunning ? '浸泡倒數中...' : '準備注水';
+      } else {
+        display.textContent = `+${m}:${s}`;
+        display.className = 'text-6xl font-mono font-bold timer-overtime transition-colors';
+        statusNotice.textContent = '⏱️ 已達預設秒數，請盡快出湯';
+      }
+    }
+
+    function finishRoundAndNext() {
+      if (!appData.currentSession) return;
+
+      const pourMethod = document.getElementById('pourMethodSelect').value;
+      const noteInput = document.getElementById('roundNote');
+      const note = noteInput.value.trim();
+
+      const roundData = {
+        round: appData.currentSession.currentRound,
+        targetDuration: timerTargetDuration,
+        actualDuration: timerTargetDuration + timerRemainingSeconds,
+        pourMethod: pourMethod,
+        note: note
+      };
+
+      appData.currentSession.rounds.push(roundData);
+
+      // Check daily point claim for finishRoundAndNext (50 points, max 1 per day)
+      const today = getTodayDateString();
+      if (appData.lastBrewPointDate !== today) {
+        appData.points += 50;
+        appData.lastBrewPointDate = today;
+        saveStateKey(STORAGE_KEYS.POINTS, appData.points);
+        saveStateKey(STORAGE_KEYS.LAST_BREW_POINT_DATE, appData.lastBrewPointDate);
+        updateUserPointsDisplay();
+        showToast('🎉 每日首次出湯下一泡，獲得 50 點靈芽茶點！');
+      } else {
+        showToast(`第 ${appData.currentSession.currentRound} 泡已記錄（今日出湯獎勵已領過）`);
+      }
+
+      appData.currentSession.currentRound++;
+      document.getElementById('currentBrewRound').textContent = appData.currentSession.currentRound;
+      noteInput.value = '';
+
+      // Increment teaware brew count
+      const activePot = appData.teawareList.find(p => p.id === appData.currentSession.teawareId);
+      if (activePot) {
+        activePot.brews = (activePot.brews || 0) + 1;
+        saveStateKey(STORAGE_KEYS.TEAWARE_LIST, appData.teawareList);
+        document.getElementById('displayBrews').textContent = activePot.brews;
+      }
+
+      saveStateKey(STORAGE_KEYS.CURRENT_SESSION, appData.currentSession);
+      renderBrewRoundsTable();
+      resetTimer();
+      checkAchievements();
+    }
+
+    function deleteCurrentPourMethod() {
+      const select = document.getElementById('pourMethodSelect');
+      const val = select.value;
+      if (appData.customOptions.pourMethod.length <= 1) {
+        showToast('⚠️ 至少需保留一個注水手法。');
+        return;
+      }
+      showConfirm(`確定要刪除注水手法「${val}」嗎？`, () => {
+        appData.customOptions.pourMethod = appData.customOptions.pourMethod.filter(m => m !== val);
+        saveStateKey(STORAGE_KEYS.CUSTOM_OPTIONS, appData.customOptions);
+        initDropdownOptions();
+        showToast('已刪除注水手法。');
+      });
+    }
+
+    let radarChartInstance = null;
+    let compareChartInstance = null;
+
+    function initRadarCharts() {
+      const ctx1 = document.getElementById('sensoryRadar').getContext('2d');
+      radarChartInstance = new Chart(ctx1, {
+        type: 'radar',
+        data: {
+          labels: ['外觀/干香', '香氣表現', '滋味醇厚', '湯質口感', '生津喉韻', '體感茶氣'],
+          datasets: [{
+            label: '本席得分',
+            data: [8.5, 9.0, 8.5, 8.0, 9.0, 8.5],
+            backgroundColor: 'rgba(155, 184, 177, 0.25)',
+            borderColor: '#9BB8B1',
+            pointBackgroundColor: '#5C4033',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#9BB8B1'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0,
+              max: 10,
+              ticks: { stepSize: 2, display: false },
+              pointLabels: { font: { family: 'Noto Serif TC', size: 11 }, color: '#5C4033' }
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      const ctx2 = document.getElementById('compareRadar').getContext('2d');
+      compareChartInstance = new Chart(ctx2, {
+        type: 'radar',
+        data: {
+          labels: ['外觀/干香', '香氣表現', '滋味醇厚', '湯質口感', '生津喉韻', '體感茶氣'],
+          datasets: [
+            {
+              label: '茶席 A',
+              data: [0, 0, 0, 0, 0, 0],
+              backgroundColor: 'rgba(155, 184, 177, 0.25)',
+              borderColor: '#9BB8B1',
+              pointBackgroundColor: '#9BB8B1'
+            },
+            {
+              label: '茶席 B',
+              data: [0, 0, 0, 0, 0, 0],
+              backgroundColor: 'rgba(200, 109, 81, 0.25)',
+              borderColor: '#C86D51',
+              pointBackgroundColor: '#C86D51'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0,
+              max: 10,
+              ticks: { stepSize: 2, display: false },
+              pointLabels: { font: { family: 'Noto Serif TC', size: 11 }, color: '#5C4033' }
+            }
+          },
+          plugins: { legend: { position: 'top' } }
+        }
+      });
+    }
+
+    function updateRadarChart() {
+      const dry = parseFloat(document.getElementById('score_dry').value);
+      const aroma = parseFloat(document.getElementById('score_aroma').value);
+      const flavor = parseFloat(document.getElementById('score_flavor').value);
+      const mouthfeel = parseFloat(document.getElementById('score_mouthfeel').value);
+      const throat = parseFloat(document.getElementById('score_throat').value);
+      const qi = parseFloat(document.getElementById('score_qi').value);
+
+      document.getElementById('val_dry').textContent = dry.toFixed(1);
+      document.getElementById('val_aroma').textContent = aroma.toFixed(1);
+      document.getElementById('val_flavor').textContent = flavor.toFixed(1);
+      document.getElementById('val_mouthfeel').textContent = mouthfeel.toFixed(1);
+      document.getElementById('val_throat').textContent = throat.toFixed(1);
+      document.getElementById('val_qi').textContent = qi.toFixed(1);
+
+      if (radarChartInstance) {
+        radarChartInstance.data.datasets[0].data = [dry, aroma, flavor, mouthfeel, throat, qi];
+        radarChartInstance.update();
+      }
+
+      if (appData.currentSession) {
+        appData.currentSession.scores = { dry, aroma, flavor, mouthfeel, throat, qi };
+        saveStateKey(STORAGE_KEYS.CURRENT_SESSION, appData.currentSession);
+      }
+    }
+
+    function initTagsSystem() {
+      renderTags();
+    }
+
+    function renderTags() {
+      const container = document.getElementById('tagsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      appData.customTags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'text-xs bg-[#EAE6DF] hover:bg-[#9BB8B1] hover:text-white text-[#5C4033] px-2.5 py-1 rounded-full border border-[#D5CFC5] transition-colors';
+        btn.textContent = '#' + tag;
+        btn.onclick = () => appendTagToNote(tag);
+        container.appendChild(btn);
+      });
+    }
+
+    function addCustomTag() {
+      const input = document.getElementById('newTagInput');
+      const val = input.value.trim().replace(/^#/, '');
+      if (val && !appData.customTags.includes(val)) {
+        appData.customTags.push(val);
+        renderTags();
+        input.value = '';
+        showToast(`已新增標籤：「#${val}」`);
+      }
+    }
+
+    function appendTagToNote(tag) {
+      const noteInput = document.getElementById('roundNote');
+      if (noteInput.value) {
+        noteInput.value += ` [${tag}]`;
+      } else {
+        noteInput.value = `[${tag}]`;
+      }
+    }
+
+    function renderBrewRoundsTable() {
+      const tbody = document.getElementById('brewRoundsTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!appData.currentSession || !appData.currentSession.rounds || appData.currentSession.rounds.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">尚無沖泡紀錄，請按「開始注水」並於出湯時點擊「出湯 / 下一泡」</td></tr>`;
+        return;
+      }
+
+      appData.currentSession.rounds.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-[#E0DCD3] hover:bg-[#FAF8F5]';
+        const actualSecStr = r.actualDuration < 0 ? `${r.actualDuration}s` : `+${r.actualDuration}s`;
+        tr.innerHTML = `
+          <td class="p-2 border border-[#D5CFC5] font-bold text-center">第 ${r.round} 泡</td>
+          <td class="p-2 border border-[#D5CFC5] font-mono text-center">${r.targetDuration}s / ${r.actualDuration}s</td>
+          <td class="p-2 border border-[#D5CFC5] text-center"><span class="bg-[#EAE6DF] px-2 py-0.5 rounded text-[11px]">${r.pourMethod || '-'}</span></td>
+          <td class="p-2 border border-[#D5CFC5]">${r.note || '無筆記'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateWaterRatio() {
+      const weight = parseFloat(document.getElementById('teaWeight').value) || 0;
+      const select = document.getElementById('teawareSelect');
+      const pot = appData.teawareList.find(p => p.id === select.value);
+      const volume = pot ? (pot.volume || 140) : 140;
+
+      const ratioDisplay = document.getElementById('displayRatio');
+      if (weight > 0) {
+        const ratio = (volume / weight).toFixed(1);
+        ratioDisplay.textContent = `1 : ${ratio}`;
+      } else {
+        ratioDisplay.textContent = '1 : --';
+      }
+      updateCurrentSessionData();
+    }
+
+    function updateCurrentSessionData() {
+      if (!appData.currentSession) return;
+      appData.currentSession.teaName = document.getElementById('teaName').value;
+      appData.currentSession.teaCategory = document.getElementById('teaCategory').value;
+      appData.currentSession.teaOrigin = document.getElementById('teaOrigin').value;
+      appData.currentSession.teaFermentation = document.getElementById('teaFermentation').value;
+      appData.currentSession.teaRoast = document.getElementById('teaRoast').value;
+      appData.currentSession.teaWeight = parseFloat(document.getElementById('teaWeight').value) || 8.0;
+      appData.currentSession.waterTemp = parseInt(document.getElementById('waterTemp').value) || 95;
+      appData.currentSession.waterType = document.getElementById('waterType').value;
+      appData.currentSession.teawareId = document.getElementById('teawareSelect').value;
+
+      saveStateKey(STORAGE_KEYS.CURRENT_SESSION, appData.currentSession);
+    }
+
+    function saveCurrentSessionToHistory() {
+      if (!appData.currentSession) return;
+      if (!appData.currentSession.teaName.trim()) {
+        showToast('⚠️ 請先填寫茶品名稱！');
+        return;
+      }
+
+      const sessionToSave = JSON.parse(JSON.stringify(appData.currentSession));
+      sessionToSave.savedAt = new Date().toLocaleString('zh-TW');
+      sessionToSave.equippedTitle = appData.equippedTitle;
+
+      appData.history.unshift(sessionToSave);
+      saveStateKey(STORAGE_KEYS.TEA_HISTORY, appData.history);
+
+      // Check daily save reward (+100 points)
+      const today = getTodayDateString();
+      let bonusMsg = '';
+      if (appData.lastDailySaveDate !== today) {
+        appData.points += 100;
+        appData.lastDailySaveDate = today;
+        saveStateKey(STORAGE_KEYS.POINTS, appData.points);
+        saveStateKey(STORAGE_KEYS.LAST_DAILY_SAVE_DATE, appData.lastDailySaveDate);
+        updateUserPointsDisplay();
+        bonusMsg = '（每日首次存檔獲得 +100 點靈芽茶點！）';
+      }
+
+      showCompletionModal(bonusMsg);
+      checkAchievements();
+      initHistoryCompareOptions();
+      renderHistoryList();
+    }
+
+    function resetCurrentSession() {
+      showConfirm('確定要清空當前茶席並重新開始嗎？', () => {
+        initNewSessionState();
+        restoreSessionToUI(appData.currentSession);
+        resetTimer();
+        showToast('已開啟全新茶席。');
+      });
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById('historyListContainer');
+      const searchKey = document.getElementById('historySearchInput').value.trim().toLowerCase();
+      const catFilter = document.getElementById('historyCategoryFilter').value;
+
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = appData.history.filter(item => {
+        const matchesCat = (catFilter === 'ALL' || item.teaCategory === catFilter);
+        const matchesSearch = !searchKey || 
+          (item.teaName && item.teaName.toLowerCase().includes(searchKey)) ||
+          (item.teaOrigin && item.teaOrigin.toLowerCase().includes(searchKey)) ||
+          (item.rounds && item.rounds.some(r => r.note && r.note.toLowerCase().includes(searchKey)));
+        return matchesCat && matchesSearch;
+      });
+
+      document.getElementById('historyCount').textContent = list.length;
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-gray-400 bg-gray-50 rounded border border-[#E0DCD3]">尚無歷史茶席紀錄。</div>`;
+        return;
+      }
+
+      list.forEach((item, idx) => {
+        const pot = appData.teawareList.find(p => p.id === item.teawareId);
+        const potName = pot ? pot.name : '未知壺具';
+        const roundCount = item.rounds ? item.rounds.length : 0;
+        const avgScore = item.scores ? ((Object.values(item.scores).reduce((a,b)=>a+b,0))/6).toFixed(1) : '-';
+
+        const div = document.createElement('div');
+        div.className = 'ru-card p-4 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border border-[#E0DCD3] hover:border-[#9BB8B1] transition-colors';
+        div.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs bg-[#5C4033] text-white px-2 py-0.5 rounded">${item.teaCategory || '烏龍茶'}</span>
+              <h3 class="text-sm font-bold text-[#2C3333]">${item.teaName}</h3>
+              <span class="text-xs text-gray-400">(${item.teaOrigin || '未註明產地'})</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-x-4 gap-y-1">
+              <span>📅 ${item.savedAt || item.date}</span>
+              <span>🫖 ${potName}</span>
+              <span>🍵 沖泡 ${roundCount} 泡</span>
+              <span>⭐ 平均得分 ${avgScore}</span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="loadHistoryToCurrent('${item.id}')" class="border border-[#9BB8B1] text-[#5C4033] text-xs px-3 py-1.5 rounded hover:bg-[#EAE6DF]">載入範本</button>
+            <button onclick="deleteHistoryItem('${item.id}')" class="border border-red-300 text-red-600 text-xs px-2.5 py-1.5 rounded hover:bg-red-50">刪除</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function loadHistoryToCurrent(id) {
+      const item = appData.history.find(h => h.id === id);
+      if (!item) return;
+      showConfirm(`確定要將「${item.teaName}」載入為當前茶席嗎？（當前未存檔內容將被覆蓋）`, () => {
+        appData.currentSession = JSON.parse(JSON.stringify(item));
+        appData.currentSession.id = 'sess_' + Date.now();
+        saveStateKey(STORAGE_KEYS.CURRENT_SESSION, appData.currentSession);
+        restoreSessionToUI(appData.currentSession);
+        switchTab('brew');
+        showToast('已載入歷史茶席範本。');
+      });
+    }
+
+    function deleteHistoryItem(id) {
+      showConfirm('確定要刪除此筆歷史茶席嗎？', () => {
+        appData.history = appData.history.filter(h => h.id !== id);
+        saveStateKey(STORAGE_KEYS.TEA_HISTORY, appData.history);
+        initHistoryCompareOptions();
+        renderHistoryList();
+        showToast('已刪除歷史紀錄。');
+      });
+    }
+
+    function initHistoryCompareOptions() {
+      const selA = document.getElementById('compareSelectA');
+      const selB = document.getElementById('compareSelectB');
+      if (!selA || !selB) return;
+
+      selA.innerHTML = '<option value="">-- 請選擇基準茶席 A --</option>';
+      selB.innerHTML = '<option value="">-- 請選擇對照茶席 B --</option>';
+
+      appData.history.forEach(h => {
+        const optText = `${h.teaName} (${h.date || h.savedAt})`;
+        selA.innerHTML += `<option value="${h.id}">${optText}</option>`;
+        selB.innerHTML += `<option value="${h.id}">${optText}</option>`;
+      });
+    }
+
+    function updateComparison() {
+      const idA = document.getElementById('compareSelectA').value;
+      const idB = document.getElementById('compareSelectB').value;
+
+      const itemA = appData.history.find(h => h.id === idA);
+      const itemB = appData.history.find(h => h.id === idB);
+
+      const dataA = itemA && itemA.scores ? [itemA.scores.dry, itemA.scores.aroma, itemA.scores.flavor, itemA.scores.mouthfeel, itemA.scores.throat, itemA.scores.qi] : [0,0,0,0,0,0];
+      const dataB = itemB && itemB.scores ? [itemB.scores.dry, itemB.scores.aroma, itemB.scores.flavor, itemB.scores.mouthfeel, itemB.scores.throat, itemB.scores.qi] : [0,0,0,0,0,0];
+
+      if (compareChartInstance) {
+        compareChartInstance.data.datasets[0].data = dataA;
+        compareChartInstance.data.datasets[1].data = dataB;
+        compareChartInstance.update();
+      }
+
+      const tbody = document.getElementById('compareTableBody');
+      if (!tbody) return;
+      const labels = ['外觀/干香', '香氣表現', '滋味醇厚', '湯質口感', '生津喉韻', '體感茶氣'];
+
+      tbody.innerHTML = '';
+      labels.forEach((lbl, i) => {
+        tbody.innerHTML += `
+          <tr class="border-b border-[#E0DCD3]">
+            <td class="p-1.5 border border-[#D5CFC5] font-medium">${lbl}</td>
+            <td class="p-1.5 border border-[#D5CFC5] font-mono text-[#9BB8B1]">${dataA[i] || '-'}</td>
+            <td class="p-1.5 border border-[#D5CFC5] font-mono text-[#C86D51]">${dataB[i] || '-'}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function exportJSON() {
+      const exportObject = {
+        systemName: MINGJI_SYSTEM_NAME,
+        version: MINGJI_SCHEMA_VERSION,
+        exportDate: new Date().toISOString(),
+        points: appData.points,
+        unlockedCards: appData.unlockedCards,
+        equippedTitle: appData.equippedTitle,
+        history: appData.history,
+        teawareList: appData.teawareList,
+        customOptions: appData.customOptions,
+        customTags: appData.customTags
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObject, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `茗記浮光_茶席資料庫_${getTodayDateString()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('📦 資料已成功匯出！');
+    }
+
+    function triggerImport() {
+      document.getElementById('jsonFileInput').click();
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.systemName !== MINGJI_SYSTEM_NAME) {
+            showToast('⚠️ 檔案格式不相容！');
+            return;
+          }
+
+          showConfirm('匯入檔案將覆蓋現有歷史與設定，確定繼續嗎？', () => {
+            if (typeof imported.points === 'number') appData.points = imported.points;
+            if (Array.isArray(imported.unlockedCards)) appData.unlockedCards = imported.unlockedCards;
+            if (imported.equippedTitle) appData.equippedTitle = imported.equippedTitle;
+            if (Array.isArray(imported.history)) appData.history = imported.history;
+            if (Array.isArray(imported.teawareList)) appData.teawareList = imported.teawareList;
+            if (imported.customOptions) appData.customOptions = imported.customOptions;
+            if (Array.isArray(imported.customTags)) appData.customTags = imported.customTags;
+
+            saveStateKey(STORAGE_KEYS.POINTS, appData.points);
+            saveStateKey(STORAGE_KEYS.UNLOCKED_CARDS, appData.unlockedCards);
+            saveStateKey(STORAGE_KEYS.EQUIPPED_TITLE, appData.equippedTitle);
+            saveStateKey(STORAGE_KEYS.TEA_HISTORY, appData.history);
+            saveStateKey(STORAGE_KEYS.TEAWARE_LIST, appData.teawareList);
+            saveStateKey(STORAGE_KEYS.CUSTOM_OPTIONS, appData.customOptions);
+
+            updateUserPointsDisplay();
+            updateEquippedTitleDisplay();
+            initTeawareSelect();
+            initDropdownOptions();
+            renderHistoryList();
+            renderCollectionGallery();
+            renderAchievements();
+
+            showToast('🎉 資料匯入完成！');
+          });
+        } catch (err) {
+          showToast('❌ JSON 檔案解析失敗');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function drawGacha(count) {
+      const cost = count * 100;
+      if (appData.points < cost) {
+        showToast(`⚠️ 靈芽茶點不足！需要 ${cost} 點，當前共有 ${appData.points} 點。`);
+        return;
+      }
+
+      appData.points -= cost;
+      saveStateKey(STORAGE_KEYS.POINTS, appData.points);
+      updateUserPointsDisplay();
+
+      const container = document.getElementById('gachaResultContainer');
+      const grid = document.getElementById('gachaCardsGrid');
+      grid.innerHTML = '';
+      container.classList.remove('hidden');
+
+      let hasSSR = false;
+
+      for (let i = 0; i < count; i++) {
+        const rand = Math.random() * 100;
+        let poolFilter = '初級';
+        if (rand < 5) poolFilter = '傳說';
+        else if (rand < 15) poolFilter = '高階';
+        else if (rand < 35) poolFilter = '史詩';
+        else if (rand < 65) poolFilter = '中級';
+
+        if (poolFilter === '傳說') hasSSR = true;
+
+        let available = GACHA_CARDS_POOL.filter(c => c.tier === poolFilter);
+        if (available.length === 0) available = GACHA_CARDS_POOL;
+
+        const card = available[Math.floor(Math.random() * available.length)];
+
+        if (!appData.unlockedCards.includes(card.id)) {
+          appData.unlockedCards.push(card.id);
+        }
+
+        const cardElem = createCardHTML(card);
+        grid.appendChild(cardElem);
+      }
+
+      saveStateKey(STORAGE_KEYS.UNLOCKED_CARDS, appData.unlockedCards);
+
+      if (hasSSR) playSongSound('ssr');
+      else playSongSound('flip');
+
+      renderTitleSelectOptions();
+      renderCollectionGallery();
+      checkAchievements();
+    }
+
+    function createCardHTML(card) {
+      const div = document.createElement('div');
+      div.className = 'card-scene';
+      div.innerHTML = `
+        <div class="card-inner" onclick="this.classList.toggle('is-flipped'); playSongSound('flip');">
+          <div class="card-face card-back">
+            <div class="text-xs font-bold font-serif">茗記浮光</div>
+            <div class="text-[10px] text-[#D5CFC5] mt-1">點擊翻面</div>
+          </div>
+          <div class="card-face card-front tier-${card.tier}">
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/60 font-semibold mb-1">${card.tier}</span>
+            <div class="text-xs font-bold text-center">${card.title}</div>
+            <div class="text-[10px] text-center mt-1 opacity-80 line-clamp-2 px-1">${card.desc}</div>
+          </div>
+        </div>
+      `;
+      return div;
+    }
+
+    function equipTitle(title) {
+      appData.equippedTitle = title;
+      saveStateKey(STORAGE_KEYS.EQUIPPED_TITLE, appData.equippedTitle);
+      updateEquippedTitleDisplay();
+      showToast(`已佩戴稱號：${title}`);
+    }
+
+    function updateEquippedTitleDisplay() {
+      document.getElementById('headerEquippedTitle').textContent = appData.equippedTitle || '【初入茶道】';
+    }
+
+    function renderTitleSelectOptions() {
+      const select = document.getElementById('titleSelect');
+      if (!select) return;
+      select.innerHTML = '';
+
+      appData.unlockedCards.forEach(id => {
+        const card = GACHA_CARDS_POOL.find(c => c.id === id);
+        if (card) {
+          const isEquipped = card.title === appData.equippedTitle ? 'selected' : '';
+          select.innerHTML += `<option value="${card.title}" ${isEquipped}>[${card.tier}] ${card.title}</option>`;
+        }
+      });
+    }
+
+    function renderCollectionGallery() {
+      const grid = document.getElementById('collectionGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      let count = 0;
+      GACHA_CARDS_POOL.forEach(card => {
+        const isUnlocked = appData.unlockedCards.includes(card.id);
+        if (isUnlocked) count++;
+
+        const div = document.createElement('div');
+        div.className = `p-3 rounded-lg border text-center transition-all ${isUnlocked ? `tier-${card.tier}` : 'bg-gray-100 border-gray-300 opacity-50'}`;
+        div.innerHTML = `
+          <div class="text-[10px] font-semibold mb-1">${isUnlocked ? card.tier : '未解鎖'}</div>
+          <div class="text-xs font-bold">${isUnlocked ? card.title : '【？？？？】'}</div>
+          <div class="text-[10px] mt-1 leading-tight">${isUnlocked ? card.desc : '透過靈芽抽卡獲得'}</div>
+        `;
+        grid.appendChild(div);
+      });
+
+      document.getElementById('collectionCount').textContent = count;
+      document.getElementById('totalCardsCount').textContent = GACHA_CARDS_POOL.length;
+    }
+
+    function renderAchievements() {
+      const container = document.getElementById('achievementsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const totalBrews = appData.history.reduce((acc, h) => acc + (h.rounds ? h.rounds.length : 0), 0);
+
+      ACHIEVEMENTS.forEach(ach => {
+        let currentVal = 0;
+        if (ach.reqType === 'sessions') currentVal = appData.history.length;
+        else if (ach.reqType === 'brews') currentVal = totalBrews;
+        else if (ach.reqType === 'points') currentVal = appData.points;
+        else if (ach.reqType === 'cards') currentVal = appData.unlockedCards.length;
+
+        const isDone = currentVal >= ach.reqVal;
+
+        const div = document.createElement('div');
+        div.className = `p-3 rounded-lg border flex justify-between items-center ${isDone ? 'bg-emerald-50 border-emerald-300' : 'bg-gray-50 border-gray-200'}`;
+        div.innerHTML = `
+          <div>
+            <div class="text-xs font-bold ${isDone ? 'text-emerald-800' : 'text-gray-700'}">${isDone ? '✅ ' : '🔒 '}${ach.title}</div>
+            <div class="text-[11px] text-gray-500 mt-0.5">${ach.desc} (${currentVal}/${ach.reqVal})</div>
+          </div>
+          <span class="text-xs font-semibold ${isDone ? 'text-emerald-700' : 'text-gray-400'}">${isDone ? '已達成' : '進行中'}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function checkAchievements() {
+      renderAchievements();
+    }
+
+    function updateUserPointsDisplay() {
+      const display = document.getElementById('userPointsDisplay');
+      if (display) display.textContent = appData.points;
+    }
+
+    function showDailyTeaModal() {
+      const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % SOLAR_TERMS_TEA_DB.length;
+      const tea = SOLAR_TERMS_TEA_DB[dayIndex];
+
+      document.getElementById('dailyCardSolarBadge').textContent = tea.solarTerm;
+      document.getElementById('dailyCardTeaName').textContent = tea.teaName;
+      document.getElementById('dailyCardSubTitle').textContent = tea.subTitle;
+      document.getElementById('dailyCardDateStr').textContent = `📅 ${getTodayDateString()}`;
+      document.getElementById('dailyCardQuote').textContent = tea.quote;
+      document.getElementById('dailyCardFlavor').textContent = tea.flavor;
+      document.getElementById('dailyCardBrewAdvice').textContent = tea.brewAdvice;
+      document.getElementById('dailyCardHealthTip').textContent = tea.healthTip;
+
+      document.getElementById('dailyTeaModal').classList.remove('hidden');
+    }
+
+    function closeDailyTeaModal() {
+      document.getElementById('dailyTeaModal').classList.add('hidden');
+    }
+
+    function showCompletionModal(bonusMsg) {
+      const randQuote = TEA_QUOTES_AND_WISDOM[Math.floor(Math.random() * TEA_QUOTES_AND_WISDOM.length)];
+      document.getElementById('completionQuoteText').textContent = randQuote.quote;
+      document.getElementById('completionQuoteAuthor').textContent = randQuote.author;
+      document.getElementById('completionHealthTip').textContent = randQuote.healthTip;
+      document.getElementById('completionRewardNotice').textContent = `🎉 存檔成功！${bonusMsg || ''}`;
+      document.getElementById('completionQuoteModal').classList.remove('hidden');
+    }
+
+    function closeCompletionModal() {
+      document.getElementById('completionQuoteModal').classList.add('hidden');
+    }
+
+    function switchTab(tabName) {
+      document.getElementById('tabBrewView').classList.add('hidden');
+      document.getElementById('tabHistoryView').classList.add('hidden');
+      document.getElementById('tabGachaView').classList.add('hidden');
+
+      document.getElementById('tabBrewBtn').classList.remove('active');
+      document.getElementById('tabHistoryBtn').classList.remove('active');
+      document.getElementById('tabGachaBtn').classList.remove('active');
+
+      if (tabName === 'brew') {
+        document.getElementById('tabBrewView').classList.remove('hidden');
+        document.getElementById('tabBrewBtn').classList.add('active');
+      } else if (tabName === 'history') {
+        document.getElementById('tabHistoryView').classList.remove('hidden');
+        document.getElementById('tabHistoryBtn').classList.add('active');
+        renderHistoryList();
+      } else if (tabName === 'gacha') {
+        document.getElementById('tabGachaView').classList.remove('hidden');
+        document.getElementById('tabGachaBtn').classList.add('active');
+        renderTitleSelectOptions();
+        renderCollectionGallery();
+        renderAchievements();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAllStorageData();
+      initDropdownOptions();
+      initTeawareSelect();
+      initRadarCharts();
+      initTagsSystem();
+      restoreSessionToUI(appData.currentSession);
+      updateUserPointsDisplay();
+      updateEquippedTitleDisplay();
+      initHistoryCompareOptions();
+      renderCollectionGallery();
+      renderAchievements();
+      resetTimer();
+    });
+  </script>
+</body>
+</html>
